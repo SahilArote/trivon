@@ -14,7 +14,14 @@
 <div class="card">
   <div class="card-body">
     <h4 class="card-title mb-4">Billing Address</h4>
-    <form action="" method="POST">
+    {% if form.non_field_errors %}
+      <div class="alert alert-danger">
+        {% for error in form.non_field_errors %}
+          <p>{{ error }}</p>
+        {% endfor %}
+      </div>
+    {% endif %}
+    <form action="{% url 'place_order' %}" method="POST">
       {% csrf_token %}
       <div class="form-row">
         <div class="col form-group">
@@ -33,7 +40,14 @@
         </div>
         <div class="col form-group">
           <label for="">Phone Number</label>
-          <input type="text" name="phone" class="form-control" required>
+          <input type="number" name="phone" class="form-control" required min="0" title="Please enter numbers only">
+          {% if form.phone.errors %}
+            <small class="text-danger">
+              {% for error in form.phone.errors %}
+                {{ error }}<br>
+              {% endfor %}
+            </small>
+          {% endif %}
         </div>
       </div>
       <div class="form-row">
@@ -56,6 +70,18 @@
           <input type="text" name="state" class="form-control" required>
         </div>
       </div>
+      <div class="form-row">
+        <div class="col form-group">
+          <label for="">country</label>
+          <input type="text" name="country" class="form-control" required>
+        </div>
+        <div class="col form-group">
+          <label for="">pincode</label>
+          <input type="text" name="pincode" class="form-control" required>
+        </div>
+      </div>
+
+
         <div class="form-row">
           <label for="">Order Note</label>
           <textarea name="order_note" rows="2" class="form-control"></textarea>
