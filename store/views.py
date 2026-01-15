@@ -8,7 +8,7 @@ from .forms import ReviewForm
 from carts.views import _cart_id
 from django.db.models import Q
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
-from accounts.models import Account    
+from orders.models import OrderProduct    
 
 # Create your views here.
 def store(request , category_slug=None):
@@ -45,10 +45,24 @@ def product_detail(request, category_slug, product_slug):
         
     except Exception as e:
         raise e
+    
+    if request.user.is_authenticated:
+        try:
+            orderproduct = OrderProduct.objects.filter(user=request.user, product_id=single_product.id).exists()
+
+        except OrderProduct.DoesNotExist:
+            orderproduct = None
+    else:
+        orderproduct = None
+
+
+    reviews = ReviewRating.objects.filter(product_id=single_product, status=True)
 
     context = {
         'single_product': single_product,
         'in_cart': in_cart,
+        'orderproduct': orderproduct,
+        'reviews': reviews,
     } 
 
     return render(request, 'store/product_detail.html', context)
@@ -81,7 +95,7 @@ def submit_review(request, product_id):
             if form.is_valid():
                 data = ReviewRating()
                 data.subject = form.cleaned_data['subject']
-                data.rating = form.cleaned_data['rating']
+                data.rating = form.cleaned_data[' ']
                 data.review = form.cleaned_data['review']
                 data.ip = request.META.get('REMOTE_ADDR')
                 data.product_id = product_id
