@@ -15,6 +15,8 @@ def store(request , category_slug=None):
     category = None
     products = None
 
+    stock_status = ""
+
     if category_slug  != None:
         category = get_object_or_404(Category, slug=category_slug)
         products = Product.objects.filter(category=category, is_available=True)
@@ -22,6 +24,11 @@ def store(request , category_slug=None):
         paginator = Paginator(products, 6)
         page = request.GET.get('page')
         paged_products = paginator.get_page(page)
+        for product in paged_products:
+            if product.stock > 0:
+                product.stock_status = True
+            else:
+                product.stock_status = False
 
     else:  
         products = Product.objects.all().filter(is_available=True).order_by('id')
@@ -29,8 +36,14 @@ def store(request , category_slug=None):
         page = request.GET.get('page')
         paged_products = paginator.get_page(page)
         product_count = products.count()   
+        for product in paged_products:
+            if product.stock > 0:
+                product.stock_status = True
+            else:
+                product.stock_status = False
 
     context = {
+        'stock_status': stock_status,
         'products': paged_products,
         'product_count': product_count,
 
