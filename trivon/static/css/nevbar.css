@@ -130,21 +130,21 @@
         grid-template-columns: 1fr;
     }
 
-    /* SEARCH BAR FULL WIDTH */
+    /* SEARCH BAR SLIM */
     .trivon-center-actions {
         width: 100%;
-        justify-content: space-between;
+        justify-content: center;
     }
 
     .trivon-search {
-        width: 100%;
+        width: 85%;
     }
 
     .trivon-search input {
         width: 100%;
-        padding: 10px 40px 10px 16px;
-        font-size: 15px;
-        border-radius: 25px;
+        padding: 8px 36px 8px 14px;
+        font-size: 13px;
+        border-radius: 20px;
     }
 
     /* SHOW LOGO INSIDE SEARCH BAR ON MOBILE */

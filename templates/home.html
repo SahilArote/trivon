@@ -1,30 +1,45 @@
 
 {% extends 'base.html' %}
 {% load static %}
-
 {% block content %}
 
-<!-- ========================= SECTION MAIN ========================= -->
-<section class="section-intro padding-y-sm">
+<section class="section-categories-mobile">
 <div class="container">
-
-<div class="intro-banner-wrap">
-	<img src="{% static 'images/banners/1.jpg' %}" class="img-fluid rounded">
-</div>
-
+	<div class="categories-scroll">
+		{% for category in links %}
+		<a href="{{ category.get_url }}" class="category-card">
+			<div class="category-img">
+				<img src="{{ category.cat_image.url }}" alt="{{ category.category_name }}">
+			</div>
+			<div class="category-name">{{ category.category_name }}</div>
+		</a>
+		{% endfor %}
+	</div>
 </div> <!-- container //  -->
 </section>
-<!-- ========================= SECTION MAIN END// ========================= -->
 
-<!-- ========================= SECTION  ========================= -->
+<section class="section-intro">
+<div class="banner-slider">
+    <div class="slides-container" id="slidesContainer">
+        <div class="slide">
+            <img src="{% static 'images/banners/8277025.jpg' %}" alt="Banner 1">
+        </div>
+        <div class="slide">
+            <img src="{% static 'images/banners/19292.jpg' %}" alt="Banner 2">
+        </div>
+    </div>
+    <div class="slide-dots" id="slideDots"></div>
+</div>
+</section>
+
 <section class="section-name padding-y-sm">
-<div class="container">
-
-<header class="section-heading">
-	<a href="{% url 'store' %}" class="btn btn-outline-primary float-right">See all</a>
+	<div class="container">
+		
+		<header class="section-heading">
+			<a href="{% url 'store' %}" class="btn btn-outline-primary float-right">See all</a>
 	<h3 class="section-title">Popular products</h3>
 </header><!-- sect-heading -->
-	
+
 
 <div class="row">
 	{% for product in products %}
@@ -43,12 +58,5 @@
 
 </div><!-- container // -->
 </section>
-<!-- ========================= SECTION  END// ========================= -->
-
-
-
-
-
-
 
 {% endblock content %}
