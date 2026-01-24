@@ -156,3 +156,7 @@ EMAIL_HOST_USER = 'arotesahil2@gmail.com'
 EMAIL_HOST_PASSWORD ='ysum njou tuya cnxr'
 EMAIL_USE_TLS = True
 
+GOOGLE_CLIENT_ID = "81485983555-oupcdr5umpi4hlhvmuh0eojo8herithj.apps.googleusercontent.com"
+GOOGLE_CLIENT_SECRET = "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"
+
+LOGIN_REDIRECT_URL = 'dashboard'

@@ -131,6 +131,7 @@
     padding: 0;
 }
 
+
 @media (max-width: 768px) {
     .categories-scroll {
         grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));

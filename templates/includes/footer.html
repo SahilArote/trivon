@@ -1,41 +1,194 @@
 {% load static %}
-<footer class="section-footer border-top bg">
-    <div class="container">
-        <section class="footer-top py-5">
-            <div class="row">
-                <aside class="col-md-4"> 
-                    <article class="footer-item">
-                        <h6 class="title">About</h6>
-                        <p>Trivon is a simple e-commerce template with a clean design. </p>
-                    </article>
-                </aside>
-                <aside class="col-md-2">
-                    <h6 class="title">Help</h6>
-                    <ul class="list-unstyled">
-                        <li> <a href="#">Support</a></li>
-                        <li> <a href="#">Shipping</a></li>
-                        <li> <a href="#">Returns</a></li>
-                    </ul>
-                </aside>
-                <aside class="col-md-3">
-                    <h6 class="title">Contacts</h6>
-                    <p>
-                        <i class="fa fa-envelope"></i> support@trivon.com <br>
-                        <i class="fa fa-phone"></i> +1 800 123 4567
-                    </p>
-                </aside>
-                <aside class="col-md-3">
-                    <h6 class="title">Follow us</h6>
-                    <ul class="list-unstyled social">
-                        <li><a href="#" class="btn btn-icon btn-light"><i class="fa fa-facebook"></i></a></li>
-                        <li><a href="#" class="btn btn-icon btn-light"><i class="fa fa-twitter"></i></a></li>
-                        <li><a href="#" class="btn btn-icon btn-light"><i class="fa fa-instagram"></i></a></li>
-                    </ul>
-                </aside>
-            </div>
-        </section>
-        <section class="footer-bottom py-3">
-            <p class="text-center">&copy; 2025 Trivon. All rights reserved.</p>
-        </section>
+<style>
+    /* =====================================================
+   FOOTER
+===================================================== */
+.site-footer {
+    background: #0f172a;
+    color: #cbd5e1;
+    padding: 48px 20px 20px;
+}
+
+.footer-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* =========================
+   GRID
+========================= */
+.footer-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 28px;
+    margin-bottom: 32px;
+}
+
+/* =========================
+   COLUMNS
+========================= */
+.footer-col {
+    text-align: center;
+}
+
+.footer-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #ffffff;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.footer-text {
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+/* =========================
+   LINKS
+========================= */
+.footer-links {
+    list-style: none;
+}
+
+.footer-links li {
+    margin-bottom: 8px;
+}
+
+.footer-links a {
+    color: #cbd5e1;
+    font-size: 14px;
+    text-decoration: none;
+}
+
+.footer-links a:hover {
+    color: #ffffff;
+}
+
+/* =========================
+   SOCIAL
+========================= */
+.footer-social {
+    display: flex;
+    justify-content: center;
+    gap: 14px;
+}
+
+.footer-social a {
+    width: 38px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.08);
+    color: #ffffff;
+    font-size: 16px;
+    transition: background 0.2s ease;
+}
+
+.footer-social a:hover {
+    background: rgba(255, 255, 255, 0.18);
+}
+
+/* =========================
+   BOTTOM
+========================= */
+.footer-bottom {
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 18px;
+    text-align: center;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.dev-credit {
+    display: inline-block;
+    margin-top: 6px;
+    color: #94a3b8;
+}
+
+/* =========================
+   TABLET
+========================= */
+@media (min-width: 768px) {
+    .footer-grid {
+        grid-template-columns: repeat(2, 1fr);
+        text-align: left;
+    }
+
+    .footer-col {
+        text-align: left;
+    }
+
+    .footer-social {
+        justify-content: flex-start;
+    }
+}
+
+/* =========================
+   DESKTOP
+========================= */
+@media (min-width: 1024px) {
+    .footer-grid {
+        grid-template-columns: 2fr 1fr 1.5fr 1.5fr;
+    }
+}
+</style>
+
+
+<footer class="site-footer">
+  <div class="footer-container">
+
+    <div class="footer-grid">
+
+      <!-- ABOUT -->
+      <div class="footer-col">
+        <h6 class="footer-title">About</h6>
+        <p class="footer-text">
+          Trivon is a modern e-commerce platform focused on clean design and smooth user experience.
+        </p>
+      </div>
+
+      <!-- HELP -->
+      <div class="footer-col">
+        <h6 class="footer-title">Help</h6>
+        <ul class="footer-links">
+          <li><a href="#">Support</a></li>
+          <li><a href="#">Shipping</a></li>
+          <li><a href="#">Returns</a></li>
+        </ul>
+      </div>
+
+      <!-- CONTACT -->
+      <div class="footer-col">
+        <h6 class="footer-title">Contact</h6>
+        <p class="footer-text">
+          <span>📧 support@trivon.com</span><br>
+          <span>📞 +1 800 123 4567</span>
+        </p>
+      </div>
+
+      <!-- SOCIAL -->
+      <div class="footer-col">
+        <h6 class="footer-title">Follow us</h6>
+        <div class="footer-social">
+          <a href="#" aria-label="Facebook"><i class="fa fa-facebook"></i></a>
+          <a href="#" aria-label="Twitter"><i class="fa fa-twitter"></i></a>
+          <a href="#" aria-label="Instagram"><i class="fa fa-instagram"></i></a>
+        </div>
+      </div>
+
     </div>
+
+    <!-- BOTTOM -->
+    <div class="footer-bottom">
+      <p>
+        © 2025 Trivon. All rights reserved. <br>
+        <span class="dev-credit">Developed by <strong>Sahil Arote</strong></span>
+      </p>
+    </div>
+
+  </div>
 </footer>

@@ -15,6 +15,8 @@ from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from django.utils.encoding import force_bytes
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import EmailMessage
+from django.conf import settings
+from urllib.parse import urlencode
 # Create your views here.
 
 
@@ -61,7 +63,6 @@ def register(request):
     return render(request, 'accounts/register.html', context)    
 
 
-
 def login(request):
     if request.method == 'POST':
         email = request.POST['email']
@@ -97,7 +98,7 @@ def login(request):
                     for pr in product_variation:
                         if pr in ex_var_list:
                             index = ex_var_list.index(pr)
-                            item_id = id[index]
+                            item_id = id[index] 
                             item = CartItem.objects.get(id=item_id)
                             item.quantity += 1
                             item.user = user
@@ -127,7 +128,67 @@ def login(request):
     return render(request, 'accounts/login.html')
 
 
+def google_login(request):
+    params = {
+        "client_id": settings.GOOGLE_CLIENT_ID,
+        "response_type": "code",
+        "scope": "openid email profile",
+        "redirect_uri": "http://127.0.0.1:8000/accounts/google/callback/",
+        "access_type": "online",
+        "prompt": "select_account"
+    }
+    url = "https://accounts.google.com/o/oauth2/v2/auth?" + urlencode(params)
+    return redirect(url)
 
+def google_callback(request):
+    code = request.GET.get('code')
+
+    token_url = "https://oauth2.googleapis.com/token"
+    data = {
+        "code": code,
+        "client_id": settings.GOOGLE_CLIENT_ID,
+        "client_secret": settings.GOOGLE_CLIENT_SECRET,
+        "redirect_uri": "http://127.0.0.1:8000/accounts/google/callback/",
+        "grant_type": "authorization_code",
+    }
+
+    token_response = requests.post(token_url, data=data)
+    token_json = token_response.json()
+
+    access_token = token_json.get('access_token')
+
+    # Get user info
+    userinfo_url = "https://www.googleapis.com/oauth2/v2/userinfo"
+    headers = {"Authorization": f"Bearer {access_token}"}
+    userinfo = requests.get(userinfo_url, headers=headers).json()
+
+    email = userinfo['email']
+    first_name = userinfo.get('given_name', '')
+    last_name = userinfo.get('family_name', '')
+
+    # 🔐 USER HANDLING (CUSTOM MODEL)
+    try:
+        user = Account.objects.get(email=email)
+    except Account.DoesNotExist:
+        user = Account.objects.create_user(
+            first_name=first_name,
+            last_name=last_name,
+            email=email,
+            username=email.split("@")[0],
+            password=None
+        )
+        profile = UserProfile.objects.create(
+            user=user,
+            profile_picture='default/defaultprofile.jpg'
+        )
+
+    # Ensure user is always active for OAuth login (both new and existing users)
+    user.is_active = True
+    user.save()
+
+    auth.login(request, user)
+    messages.success(request, "Logged in with Google")
+    return redirect('dashboard')
 
 
 @login_required(login_url = 'login')
@@ -160,10 +221,10 @@ def dashboard(request):
     orders = Order.objects.order_by('-created_at').filter(user_id=request.user.id, is_ordered=True)
     orders_count = orders.count()
 
-    # userprofile = UserProfile.objects.get(user_id=request.user.id)
+    userprofile = UserProfile.objects.get(user_id=request.user.id)
     context = {
         'orders_count': orders_count,
-        # 'userprofile': userprofile,
+        'userprofile': userprofile,
     }
     return render(request, 'accounts/dashboard.html', context)
 
@@ -198,6 +259,20 @@ def edit_profile(request):
     }
     return render(request, 'accounts/edit_profile.html', context)
 
+def order_detail(request, order_id):
+    order = get_object_or_404(Order, order_number=order_id, user=request.user, is_ordered=True)
+    ordered_products = OrderProduct.objects.filter(order_id=order.id).prefetch_related('variations')
+
+    subtotal = 0
+    for item in ordered_products:
+        subtotal += item.product_price * item.quantity
+
+    context = {
+        'order': order,
+        'order_detail': ordered_products,
+        'subtotal': subtotal,
+    }
+    return render(request, 'accounts/order_detail.html', context)
 
 @login_required(login_url='login')
 def change_password(request):
