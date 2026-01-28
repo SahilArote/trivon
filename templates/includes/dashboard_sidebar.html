@@ -1,12 +1,180 @@
-<aside class="col-md-3">
-  <!--   SIDEBAR   -->
-  <ul class="list-group">
-    <a class="list-group-item {% if '/accounts/' == request.path %}active {% elif '/accounts/dashboard/' == request.path %}active {% endif %}" href="{% url 'dashboard' %}"> Dashboard </a>
-    <a class="list-group-item {% if '/my_orders/' in request.path %}active{% endif %}" href="{% url 'my_orders' %}"> My Orders </a>
-    <a class="list-group-item {% if '/edit_profile/' in request.path %}active{% endif %}" href="{% url 'edit_profile' %}"> Edit Profile </a>
-    <a class="list-group-item {% if '/change_password/' in request.path %}active{% endif %}" href="{% url 'change_password' %}"> Change Password </a>
-  </ul>
-  <br>
-  <a class="btn btn-light btn-block" href="{% url 'logout' %}"> <i class="fa fa-power-off"></i> <span class="text">Log out</span> </a>
-  <!--   SIDEBAR .//END   -->
-</aside> 
+<style>
+/* ================= SIDEBAR ================= */
+.dashboard-sidebar {
+    width: 260px;
+    background: #ffffff;
+    padding: 20px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+}
+
+/* Menu */
+.dashboard-menu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.dashboard-menu a {
+    display: block;
+    padding: 12px 15px;
+    margin-bottom: 8px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: 15px;
+    color: #333;
+    transition: background 0.25s ease, color 0.25s ease;
+}
+
+.dashboard-menu a:hover {
+    background: #f3f4f6;
+}
+
+.dashboard-menu a.active {
+    background: #111827;
+    color: #fff;
+}
+
+/* Logout */
+.logout-btn {
+    display: block;
+    margin-top: 20px;
+    padding: 12px;
+    text-align: center;
+    border-radius: 8px;
+    text-decoration: none;
+    background: #f8f8f8;
+    color: #e63946;
+    font-weight: 500;
+}
+
+
+/* ================= MOBILE HEADER ================= */
+.mobile-header {
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 4px;
+    margin-bottom: 12px;
+}
+
+.mobile-title {
+    font-size: 17px;
+    font-weight: 600;
+    color: #111827;
+}
+
+/* Menu Button */
+.menu-btn {
+    width: 42px;
+    height: 42px;
+    background: transparent;
+    border: none;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.15s ease;
+}
+
+.menu-btn span {
+    width: 20px;
+    height: 2px;
+    background: #111827;
+    border-radius: 2px;
+}
+
+.menu-btn:hover {
+    background: rgba(0,0,0,0.05);
+}
+
+.menu-btn:active {
+    transform: scale(0.96);
+}
+
+/* ================= OVERLAY ================= */
+.sidebar-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    z-index: 1000;
+}
+
+/* ================= MOBILE BEHAVIOR ================= */
+@media (max-width: 768px) {
+
+    .mobile-header {
+        display: flex;
+    }
+
+    .dashboard-sidebar {
+        position: fixed;
+        top: 0;
+        left: -100%;
+        height: 100vh;
+        z-index: 1001;
+        transition: left 0.3s ease;
+    }
+
+    .dashboard-sidebar.open {
+        left: 0;
+    }
+
+    .sidebar-overlay.show {
+        display: block;
+    }
+}
+</style>
+
+<!-- Mobile Header -->
+<div class="mobile-header">
+    <span class="mobile-title">My Account</span>
+    <button class="menu-btn" onclick="toggleSidebar()" aria-label="Open menu">
+        <span></span>
+        <span></span>
+        <span></span>
+    </button>
+</div>
+
+<!-- Overlay -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+<!-- Sidebar -->
+<aside class="dashboard-sidebar" id="dashboardSidebar">
+    <ul class="dashboard-menu">
+        <a href="{% url 'dashboard' %}"
+           class="{% if '/accounts/' == request.path or '/accounts/dashboard/' == request.path %}active{% endif %}">
+            Dashboard
+        </a>
+
+        <a href="{% url 'my_orders' %}"
+           class="{% if '/my_orders/' in request.path %}active{% endif %}">
+            My Orders
+        </a>
+
+        <a href="{% url 'edit_profile' %}"
+           class="{% if '/edit_profile/' in request.path %}active{% endif %}">
+            Edit Profile
+        </a>
+
+        <a href="{% url 'change_password' %}"
+           class="{% if '/change_password/' in request.path %}active{% endif %}">
+            Change Password
+        </a>
+    </ul>
+
+    <a href="{% url 'logout' %}" class="logout-btn">Log out</a>
+</aside>
+
+<script>
+function toggleSidebar() {
+    const sidebar = document.getElementById('dashboardSidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+
+    sidebar.classList.toggle('open');
+    overlay.classList.toggle('show');
+}
+</script>

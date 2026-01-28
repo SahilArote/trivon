@@ -1,87 +1,221 @@
 {% extends 'base.html' %}
-
-
 {% block content %}
 
-<section class="section-conten padding-y bg">
+<style>
+/* ================= PAGE BASE ================= */
+.profile-section {
+    background: #f4f6fb;
+    padding: 30px 0;
+}
 
-{% include 'includes/alerts.html' %}
-<div class="container">
-	<div class="row">
-	{% include 'includes/dashboard_sidebar.html' %}
-	<main class="col-md-9">
-		<article class="card">
-		<header class="card-header">
-			<strong class="d-inline-block mr-3">Edit your profile</strong>
+.profile-container {
+    max-width: 1200px;
+    margin: auto;
+    padding: 0 15px;
+}
 
-		</header>
-		<div class="card-body">
-			<div class="text-right">
-				{% if userprofile.profile_picture %}
-					<img src="{{userprofile.profile_picture.url}}" alt="Profile Picture" width="100" style="border-radius:50px;">
-				{% else %}
-					<p>No profile picture uploaded</p>
-				{% endif %}
-			</div>
-			<div class="row">
-			<div class="col-md-12">
-				<form action="{% url 'edit_profile' %}" method="POST" enctype="multipart/form-data">
-					{% csrf_token %}
-					<div class="form-row">
-						<div class="form-group col-md-6">
-							<label>First Name</label>
-							{{user_form.first_name}}
-						</div>
-						<div class="form-group col-md-6">
-							<label>Last Name</label>
-							{{user_form.last_name}}
-						</div>
-					</div>
-					<div class="form-row">
-						<div class="form-group col-md-6">
-							<label>Phone Number</label>
-							{{user_form.phone_number}}
-						</div>
-						<div class="form-group col-md-6">
-							<label>Profile Picture</label>
-							{{profile_form.profile_picture}}
-						</div>
-					</div>
-					<div class="form-group">
-						<label>Address Line 1</label>
-						{{profile_form.address_line_1}}
-					</div>
-					<div class="form-group">
-						<label>Address Line 2</label>
-						{{profile_form.address_line_2}}
-					</div>
-					<div class="form-row">
-						<div class="form-group col-md-4">
-							<label>City</label>
-							{{profile_form.city}}
-						</div>
-						<div class="form-group col-md-4">
-							<label>State</label>
-							{{profile_form.state}}
-						</div>
-						<div class="form-group col-md-4">
-							<label>Country</label>
-							{{profile_form.country}}
-						</div>
-					</div>
-					<input type="submit" value="Save" class="btn btn-primary">
-				</form>
-			</div>
+.profile-layout {
+    display: flex;
+    gap: 25px;
+}
 
-			</div> <!-- row.// -->
-		</div> <!-- card-body .// -->
+/* ================= CONTENT ================= */
+.profile-content {
+    flex: 1;
+}
 
-		</article> <!-- order-group.// -->
-	</main>
-</div> <!-- row.// -->
-</div>
+/* Card */
+.profile-card {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 25px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+}
 
+.profile-header {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 20px;
+}
 
+/* ================= PROFILE IMAGE ================= */
+.profile-image {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 20px;
+}
+
+.profile-image img {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+/* ================= FORM ================= */
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2,1fr);
+    gap: 20px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    font-size: 14px;
+    margin-bottom: 6px;
+    color: #374151;
+}
+
+/* Django form inputs */
+.form-group input,
+.form-group select,
+.form-group textarea {
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid #d1d5db;
+    font-size: 14px;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #111827;
+}
+
+/* Full width */
+.full {
+    grid-column: span 2;
+}
+
+/* Save button */
+.save-btn {
+    margin-top: 25px;
+    padding: 12px 20px;
+    background: #111827;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-size: 15px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.save-btn:hover {
+    background: #000;
+}
+
+/* ================= MOBILE ================= */
+@media (max-width: 768px) {
+    .profile-layout {
+        flex-direction: column;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .full {
+        grid-column: span 1;
+    }
+
+    .profile-image {
+        justify-content: center;
+    }
+}
+</style>
+
+<section class="profile-section">
+    {% include 'includes/alerts.html' %}
+
+    <div class="profile-container">
+        <div class="profile-layout">
+
+            <!-- SIDEBAR -->
+            {% include 'includes/dashboard_sidebar.html' %}
+
+            <!-- MAIN CONTENT -->
+            <main class="profile-content">
+
+                <div class="profile-card">
+                    <div class="profile-header">
+                        Edit Your Profile
+                    </div>
+
+                    <!-- Profile Image -->
+                    <div class="profile-image">
+                        {% if userprofile.profile_picture %}
+                            <img src="{{ userprofile.profile_picture.url }}" alt="Profile Picture">
+                        {% endif %}
+                    </div>
+
+                    <!-- FORM -->
+                    <form action="{% url 'edit_profile' %}" method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+
+                        <div class="form-grid">
+
+                            <div class="form-group">
+                                <label>First Name</label>
+                                {{ user_form.first_name }}
+                            </div>
+
+                            <div class="form-group">
+                                <label>Last Name</label>
+                                {{ user_form.last_name }}
+                            </div>
+
+                            <div class="form-group">
+                                <label>Phone Number</label>
+                                {{ user_form.phone_number }}
+                            </div>
+
+                            <div class="form-group">
+                                <label>Profile Picture</label>
+                                {{ profile_form.profile_picture }}
+                            </div>
+
+                            <div class="form-group full">
+                                <label>Address Line 1</label>
+                                {{ profile_form.address_line_1 }}
+                            </div>
+
+                            <div class="form-group full">
+                                <label>Address Line 2</label>
+                                {{ profile_form.address_line_2 }}
+                            </div>
+
+                            <div class="form-group">
+                                <label>City</label>
+                                {{ profile_form.city }}
+                            </div>
+
+                            <div class="form-group">
+                                <label>State</label>
+                                {{ profile_form.state }}
+                            </div>
+
+                            <div class="form-group">
+                                <label>Country</label>
+                                {{ profile_form.country }}
+                            </div>
+
+                        </div>
+
+                        <button type="submit" class="save-btn">
+                            Save Changes
+                        </button>
+                    </form>
+
+                </div>
+            </main>
+
+        </div>
+    </div>
 </section>
 
 {% endblock %}

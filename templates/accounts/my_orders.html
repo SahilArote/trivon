@@ -1,56 +1,292 @@
 {% extends "base.html" %}
-
 {% block content %}
+
+<style>
+/* ================== RESET / BASE ================== */
+* {
+    box-sizing: border-box;
+}
+
+body {
+    background: #f8fafc;
+}
+
+/* ================== LAYOUT ================== */
+.dashboard-layout {
+    display: flex;
+    gap: 24px;
+    align-items: flex-start;
+}
+
+.dashboard-main {
+    flex: 1;
+    min-width: 0;
+    max-width: 1000px;          /* content ko healthy width */
+    margin-left: 20px;         /* right ki taraf push */
+}
+
+/* ================== CARD ================== */
+.card {
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+    overflow: hidden;
+}
+
+.card-header {
+    padding: 18px 20px;
+    border-bottom: 1px solid #eef2f7;
+}
+
+.order-page-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #0f172a;
+}
+
+.card-body {
+    padding: 0;
+}
+
+/* ================== DESKTOP TABLE ================== */
+.orders-desktop {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.orders-desktop thead {
+    background: #f9fafb;
+}
+
+.orders-desktop th {
+    padding: 14px 16px;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #64748b;
+    text-align: left;
+}
+
+.orders-desktop td {
+    padding: 16px;
+    font-size: 14px;
+    color: #0f172a;
+    border-top: 1px solid #eef2f7;
+}
+
+.orders-desktop tr {
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+
+.orders-desktop tr:hover {
+    background: #f8fafc;
+}
+
+.order-id {
+    font-weight: 600;
+}
+
+.order-total {
+    font-weight: 600;
+    color: #16a34a;
+}
+
+.order-date {
+    color: #64748b;
+}
+
+/* ================== MOBILE ORDERS ================== */
+.orders-mobile {
+    display: none;
+    padding: 22px;
+}
+
+.order-card {
+    background: #ffffff;
+    border-radius: 18px;
+    padding: 18px;
+    margin-bottom: 14px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+}
+
+/* Card header */
+.order-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.order-card-header .left {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.order-amount {
+    font-size: 16px;
+    font-weight: 700;
+    color: #16a34a;
+    white-space: nowrap;
+}
+
+/* Card body */
+.order-card-body {
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid #eef2f7;
+}
+
+.order-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+    margin-bottom: 8px;
+}
+
+.order-row span {
+    color: #64748b;
+}
+
+.order-row strong {
+    font-weight: 500;
+    color: #0f172a;
+}
+
+/* Button */
+.order-card-btn {
+    display: block;
+    margin-top: 14px;
+    padding: 14px;
+    border-radius: 14px;
+    background: #ff3a3a;
+    color: #ffffff;
+    text-align: center;
+    font-size: 15px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: transform 0.15s ease, background 0.2s ease;
+}
+
+.order-card-btn:active {
+    transform: scale(0.97);
+}
+
+.order-card-btn:hover {
+    background: #ff4444;
+}
+
+/* ================== RESPONSIVE ================== */
+@media (max-width: 992px) {
+    .dashboard-layout {
+        flex-direction: column;
+    }
+    .dashboard-main {
+        max-width: 100%;
+        margin-left: 20px;
+    }
+}
+
+@media (max-width: 768px) {
+    .orders-desktop {
+        display: none;
+    }
+
+    .orders-mobile {
+        display: block;
+    }
+
+    .card-header {
+        padding: 16px;
+    }
+}
+</style>
 
 <section class="section-conten padding-y bg">
     {% include "includes/alerts.html" %}
 
-<div class="container">
-	<div class="row">
-	{% include 'includes/dashboard_sidebar.html' %}
-	<main class="col-md-9">
-		<article class="card">
-		<header class="card-header">
-			<strong class="d-inline-block mr-3">Your order history</strong>
+    <div class="container dashboard-layout">
+        {% include 'includes/dashboard_sidebar.html' %}
 
-		</header>
-		<div class="card-body">
-			<div class="row">
-			<div class="col-md-12">
-				<table class="table table-hover">
-				  <thead>
-				    <tr>
-				      <th scope="col">Order #</th>
-				      <th scope="col">Billing Name</th>
-				      <th scope="col">Phone</th>
-				      <th scope="col">Order Total</th>
-							<th scope="col">Date</th>
-				    </tr>
-				  </thead>
-				  <tbody>
-						{% for order in orders %}
-				    <tr>
-				      <th scope="row"><a href="{% url 'order_detail' order.order_number %}">{{order.order_number}}</a></th>
-				      <td>{{order.full_name}}</td>
-				      <td>{{order.phone}}</td>
-				      <td>${{order.order_total}}</td>
-							<td>{{order.created_at}}</td>
-				    </tr>
-				{% endfor %}
+        <main class="dashboard-main">
+            <article class="card">
 
-				  </tbody>
-				</table>
-			</div>
+                <header class="card-header">
+                    <span class="order-page-title">My Orders</span>
+                </header>
 
-			</div> <!-- row.// -->
-		</div> <!-- card-body .// -->
+                <div class="card-body">
 
-		</article> <!-- order-group.// -->
-	</main>
-</div> <!-- row.// -->
-</div>
+                    <!-- ========== DESKTOP TABLE ========== -->
+                    <table class="orders-desktop">
+                        <thead>
+                            <tr>
+                                <th>Order</th>
+                                <th>Name</th>
+                                <th>Phone</th>
+                                <th>Total</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for order in orders %}
+                            <tr onclick="window.location.href='{% url 'order_detail' order.order_number %}'">
+                                <td class="order-id">#{{ order.order_number }}</td>
+                                <td>{{ order.full_name }}</td>
+                                <td>{{ order.phone }}</td>
+                                <td class="order-total">₹{{ order.order_total }}</td>
+                                <td class="order-date">{{ order.created_at|date:"d M Y" }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" style="text-align:center; padding:30px; color:#64748b;">
+                                    You haven’t placed any orders yet.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
 
+                    <!-- ========== MOBILE CARDS ========== -->
+                    <div class="orders-mobile">
+                        {% for order in orders %}
+                        <div class="order-card">
 
+                            <div class="order-card-header">
+                                <div class="left">
+                                    <div class="order-id">Order #{{ order.order_number }}</div>
+                                    <div class="order-date">{{ order.created_at|date:"d M Y" }}</div>
+                                </div>
+                                <div class="order-amount">₹{{ order.order_total }}</div>
+                            </div>
+
+                            <div class="order-card-body">
+                                <div class="order-row">
+                                    <span>Name</span>
+                                    <strong>{{ order.full_name }}</strong>
+                                </div>
+                                <div class="order-row">
+                                    <span>Phone</span>
+                                    <strong>{{ order.phone }}</strong>
+                                </div>
+                            </div>
+
+                            <a href="{% url 'order_detail' order.order_number %}" class="order-card-btn">
+                                View Order
+                            </a>
+                        </div>
+                        {% empty %}
+                        <p style="text-align:center; color:#64748b;">
+                            You haven’t placed any orders yet.
+                        </p>
+                        {% endfor %}
+                    </div>
+
+                </div>
+            </article>
+        </main>
+    </div>
 </section>
 
 {% endblock %}

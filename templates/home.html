@@ -3,6 +3,65 @@
 {% load static %}
 {% block content %}
 
+<style>
+	/* ================= MOVING PRODUCTS STRIP ================= */
+.moving-products {
+    width: 100%;
+    overflow: hidden;
+    background: #fff;
+    border-top: 1px solid #eee;
+    border-bottom: 1px solid #eee;
+    padding: 8px 0;
+}
+
+.moving-track {
+    display: flex;
+    width: max-content;
+    animation: scrollProducts 10s linear infinite;
+}
+
+.moving-item {
+    flex: 0 0 auto;
+    width: 90px;
+    height: 90px;
+    margin: 0 10px;
+    border-radius: 10px;
+    overflow: hidden;
+    background: #f7f7f7;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+
+.moving-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+/* Pause on hover */
+.moving-products:hover .moving-track {
+    animation-play-state: paused;
+}
+
+@keyframes scrollProducts {
+    from {
+        transform: translateX(250%);
+    }
+    to {
+        transform: translateX(-150%);
+    }
+}
+
+/* ================= MOBILE ================= */
+@media (max-width: 576px) {
+    .moving-item {
+        width: 70px;
+        height: 70px;
+        margin: 0 6px;
+    }
+}
+</style>
+
 <section class="section-categories-mobile">
 <div class="container">
 	<div class="categories-scroll">
@@ -31,6 +90,25 @@
     <div class="slide-dots" id="slideDots"></div>
 </div>
 </section>
+
+<!-- ================= MOVING PRODUCTS STRIP ================= -->
+<section class="moving-products">
+    <div class="moving-track">
+        {% for product in products %}
+        <a href="{{ product.get_url }}" class="moving-item">
+            <img src="{{ product.image.url }}" alt="{{ product.product_name }}">
+        </a>
+        {% endfor %}
+
+        {# duplicate for smooth infinite scroll #}
+        {% for product in products %}
+        <a href="{{ product.get_url }}" class="moving-item">
+            <img src="{{ product.image.url }}" alt="{{ product.product_name }}">
+        </a>
+        {% endfor %}
+    </div>
+</section>
+
 
 <section class="section-name padding-y-sm">
 	<div class="container">
