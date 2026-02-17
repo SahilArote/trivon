@@ -15,7 +15,7 @@ def store(request , category_slug=None):
     category = None
     products = None
 
-    stock_status = ""
+    
 
     if category_slug  != None:
         category = get_object_or_404(Category, slug=category_slug)
@@ -24,11 +24,7 @@ def store(request , category_slug=None):
         paginator = Paginator(products, 6)
         page = request.GET.get('page')
         paged_products = paginator.get_page(page)
-        for product in paged_products:
-            if product.stock > 0:
-                product.stock_status = True
-            else:
-                product.stock_status = False
+        
 
     else:  
         products = Product.objects.all().filter(is_available=True).order_by('id')
@@ -36,14 +32,9 @@ def store(request , category_slug=None):
         page = request.GET.get('page')
         paged_products = paginator.get_page(page)
         product_count = products.count()   
-        for product in paged_products:
-            if product.stock > 0:
-                product.stock_status = True
-            else:
-                product.stock_status = False
-
+        
     context = {
-        'stock_status': stock_status,
+        
         'products': paged_products,
         'product_count': product_count,
 
@@ -81,16 +72,26 @@ def product_detail(request, category_slug, product_slug):
     return render(request, 'store/product_detail.html', context)
 
 def search(request):
+    products = Product.objects.none()
+    product_count = 0
+
     if 'keyword' in request.GET:
-        keyword = request.GET['keyword']
+        keyword = request.GET.get('keyword')
         if keyword:
-            products = Product.objects.order_by('-created_date').filter(Q(description__icontains=keyword) | Q(product_name__icontains=keyword))
-            prodeuct_count = products.count()
+            products = Product.objects.filter(
+                Q(description__icontains=keyword) |
+                Q(product_name__icontains=keyword)
+            ).order_by('-created_date')
+
+            product_count = products.count()
+
     context = {
         'products': products,
-        'product_count': prodeuct_count,
-    }       
+        'product_count': product_count,
+    }
+
     return render(request, 'store/store.html', context)
+
 
 
 def submit_review(request, product_id):

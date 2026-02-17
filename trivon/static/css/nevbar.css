@@ -1,4 +1,10 @@
 /* ================= HEADER ================= */
+* {
+    margin: 0;
+    padding: 0;
+    font-family: Assistant,-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    box-sizing: border-box;
+}
 .trivon-header {
     background: #fff;
     position: sticky;
@@ -9,7 +15,7 @@
     z-index: 1000;
 }
 
-/* GRID LAYOUT */
+/* GRID LAYOUT */ 
 .trivon-header-row {
     display: grid;
     grid-template-columns: auto 1fr auto;
