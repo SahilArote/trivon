@@ -1,209 +1,412 @@
 {% extends "base.html" %}
 {% load static %}
-
-
 {% block content %}
 
-<section class="section-content padding-y bg">
-<div class="container">
+<style>
+    /* ================= PREMIUM MYNTRA-INSPIRED UI ================= */
+    :root {
+        --m-pink: #ff3f6c;
+        --m-dark: #282c3f;
+        --m-gray: #94969f;
+        --m-light-gray: #535766;
+        --m-border: #eaeaec;
+        --m-rating-green: #14958f;
+        --m-bg: #ffffff;
+        --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        --shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
 
-<!-- ============================ COMPONENT 1 ================================= -->
-<div class="card">
-	<div class="row no-gutters">
-		<aside class="col-md-6">
-<article class="gallery-wrap"> 
-	<div class="img-big-wrap">
-	   <a href="#"><img src="{{ single_product.image.url }}"></a>
-	</div> <!-- img-big-wrap.// -->
-	
-</article> <!-- gallery-wrap .end// -->
-		</aside>
-		<main class="col-md-6 border-left">
-		<form action="{% url 'add_cart' single_product.id %} " method="POST">
-			{% csrf_token %}
-			<article class="content-body">
+    body {
+        background-color: var(--m-bg);
+        font-family: 'Assistant', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        color: var(--m-dark);
+        margin: 0;
+    }
 
-			<h2 class="title">{{ single_product.product_name }}</h2>
-			{% if single_product.countReview > 0 %}
-			<div class="rating-star">
-				<span>
-					<i class="fa fa-star{% if single_product.averageReview < 0.5 %}-o{% elif single_product.averageReview >= 0.5 and single_product.averageReview < 1 %}-half-o {% endif %}" aria-hidden="true"></i>
-					<i class="fa fa-star{% if single_product.averageReview < 1.5 %}-o{% elif single_product.averageReview >= 1.5 and single_product.averageReview < 2 %}-half-o {% endif %}" aria-hidden="true"></i>
-					<i class="fa fa-star{% if single_product.averageReview < 2.5 %}-o{% elif single_product.averageReview >= 2.5 and single_product.averageReview < 3 %}-half-o {% endif %}" aria-hidden="true"></i>
-					<i class="fa fa-star{% if single_product.averageReview < 3.5 %}-o{% elif single_product.averageReview >= 3.5 and single_product.averageReview < 4 %}-half-o {% endif %}" aria-hidden="true"></i>
-					<i class="fa fa-star{% if single_product.averageReview < 4.5 %}-o{% elif single_product.averageReview >= 4.5 and single_product.averageReview < 5 %}-half-o {% endif %}" aria-hidden="true"></i>
-					<span>({{ single_product.averageReview }}) Rating</span>
-				</span>
-			</div>
-			{% else %}
-			<div class="rating-star">
-				<span>
-					<i class="fa fa-star" aria-hidden="true"></i>
-					<i class="fa fa-star" aria-hidden="true"></i>
-					<i class="fa fa-star" aria-hidden="true"></i>
-					<i class="fa fa-star" aria-hidden="true"></i>
-					<i class="fa fa-star-o" aria-hidden="true"></i>
-					<span>(4.0) ratings </span>
-				</span>
-			</div>
-			{% endif %}
-			<br>
+    .store-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 20px 30px;
+    }
 
-			<div class="mb-3"> 
-				<var class="price h4">${{ single_product.price }}</var> 
-			</div> 
+    /* BREADCRUMB */
+    .breadcrumb-area {
+        font-size: 14px;
+        margin-bottom: 25px;
+    }
+    .breadcrumb-area a { color: var(--m-dark); text-decoration: none; font-weight: 600; }
+    .breadcrumb-area span { color: var(--m-gray); margin: 0 8px; }
 
-			<p>{{ single_product.description }}</p>
-			<hr>
-				<div class="row">
-					<div class="item-option-select">
-						<h6>Choose Color</h6>
-						<select name="color" class="form-control" required>
-							<option value=""disabled selected >select</option>
-							{% for i in single_product.variation_set.colors %}
-							<option value="{{ i.variation_value | lower}}">{{ i.variation_value | capfirst}}</option>
-							{% endfor %}
-						</select>
-					</div>
-				</div> <!-- row.// -->
-				<div class="row">
-					<div class="item-option-select">
-						<h6>Select Size</h6>
-						<select name="size" class="form-control" required>
-							<option value=""disabled selected > Size</option>
-							{% for i in single_product.variation_set.sizes %}
-							<option value="{{ i.variation_value | lower }}">{{ i.variation_value | capfirst}}</option>
-							{% endfor %}
-						</select>
-					</div>
-				</div> <!-- row.// -->
-				<hr>
-				{% if single_product.stock <= 0 %}
-				<p class="text-danger"><b>Out of Stock</b></p>
-				{% else %}
-					<button type="submit"  class="btn  btn-primary"> <span class="text">Add to cart</span> <i class="fas fa-shopping-cart"></i>  </button>
-				
-				{% endif %}
-			</article> <!-- product-info-aside .// -->
-		</form>
-		</main> <!-- col.// -->
-	</div> <!-- row.// -->
-</div> <!-- card.// -->
-<!-- ============================ COMPONENT 1 END .// ================================= -->
+    /* LAYOUT */
+    .main-layout {
+        display: grid;
+        grid-template-columns: 240px 1fr;
+        gap: 40px;
+    }
 
-<br>
+    /* SIDEBAR FILTERS */
+    .filters-sidebar {
+        border-right: 1px solid var(--m-border);
+        padding-right: 20px;
+    }
 
-<div class="row">
-			<div class="col-md-9">
+    .filter-section {
+        padding: 20px 0;
+        border-top: 1px solid var(--m-border);
+    }
 
-	<header class="section-heading">
-		<h3>Customer Reviews </h3>  
-		
-	</header>
+    .filter-title {
+        font-size: 14px;
+        font-weight: 700;
+        text-transform: uppercase;
+        margin-bottom: 15px;
+        display: block;
+    }
 
-	<form action="{% url 'submit_review' single_product.id %}" method ="POST">
-		{% csrf_token %}
-		<h5>Write your Reviews</h5>
-		<div>
-			<label>How do you rate this product?</label>
-			<br>
-			<div class="rate">
-				<input type="radio" name="rating" id="rating10" value="5" required /><label for="rating10" title="5"></label>
-				<input type="radio" name="rating" id="rating9" value="4.5" required /><label for="rating9" title="4.5" class="half"></label>
-				<input type="radio" name="rating" id="rating8" value="4" required /><label for="rating8" title="4"></label>
-				<input type="radio" name="rating" id="rating7" value="3.5" required /><label for="rating7" title="3.5" class="half"></label>
-				<input type="radio" name="rating" id="rating6" value="3" required /><label for="rating6" title="3"></label>
-				<input type="radio" name="rating" id="rating5" value="2.5" required /><label for="rating5" title="2.5" class="half"></label>
-				<input type="radio" name="rating" id="rating4" value="2" required /><label for="rating4" title="2"></label>
-				<input type="radio" name="rating" id="rating3" value="1.5" required /><label for="rating3" title="1.5" class="half"></label>
-				<input type="radio" name="rating" id="rating2" value="1" required /><label for="rating2" title="1"></label>
-				<input type="radio" name="rating" id="rating1" value="0.5" required /><label for="rating1" title="0.5" class="half"></label>
-			</div>
-			<br>
-						
-			Review Title:
-			<input type="text" class="form-control" name="subject" required><br>
-			Review:
-			<textarea name="review" class="form-control" row="4"></textarea><br>
-			{% if user.is_authenticated %}
-				{% if orderproduct %}
-					<input type="submit" value="Submit Review" class="btn btn-primary">
-				{% else %}
-					<p>You must purchase this product to post a review.</p>
-				{% endif %}
-			{% else %}
-				<p>You must be logged in to post a review. <span><a href="{% url 'login' %}">Login now</a></span></p>
-			{% endif %}
-		</div>
-		<br>
-		{% include "includes/alerts.html" %}
-		</form>
-		<br>
-		<header class="section-heading">
-		<h3>Customer Reviews </h3>  
-		{% if single_product.countReview > 0 %}
-		<div class="rating-star">
-				<span>
-					<i class="fa fa-star{% if single_product.averageReview < 0.5 %}-o{% elif single_product.averageReview >= 0.5 and single_product.averageReview < 1 %}-half-o {% endif %}" aria-hidden="true"></i>
-					<i class="fa fa-star{% if single_product.averageReview < 1.5 %}-o{% elif single_product.averageReview >= 1.5 and single_product.averageReview < 2 %}-half-o {% endif %}" aria-hidden="true"></i>
-					<i class="fa fa-star{% if single_product.averageReview < 2.5 %}-o{% elif single_product.averageReview >= 2.5 and single_product.averageReview < 3 %}-half-o {% endif %}" aria-hidden="true"></i>
-					<i class="fa fa-star{% if single_product.averageReview < 3.5 %}-o{% elif single_product.averageReview >= 3.5 and single_product.averageReview < 4 %}-half-o {% endif %}" aria-hidden="true"></i>
-					<i class="fa fa-star{% if single_product.averageReview < 4.5 %}-o{% elif single_product.averageReview >= 4.5 and single_product.averageReview < 5 %}-half-o {% endif %}" aria-hidden="true"></i>
-					<span>({{ single_product.averageReview }}) {{ single_product.countReview }} Rating</span>
-				</span>
-			</div>
-		{% else %}
-		<div class="rating-star">
-				<span>
-					<i class="fa fa-star" aria-hidden="true"></i>
-					<i class="fa fa-star" aria-hidden="true"></i>
-					<i class="fa fa-star" aria-hidden="true"></i>
-					<i class="fa fa-star" aria-hidden="true"></i>
-					<i class="fa fa-star-o" aria-hidden="true"></i>
-					<span>(4.0) reviews</span>
-				</span>
-			</div>
-		{% endif %}
-		<br>
-		
-		</header>
-		{% for review in reviews %}
-	<article class="box mb-3">
-		<div class="icontext w-100">
-			<div class="text">
-				<span class="date text-muted float-md-right">{{review.updated_at}} </span>  
-				<h6 class="mb-1">{{review.user.full_name}}</h6>
-				<div class="rating-star">
-					<span>
-						<i class="fa fa-star{% if review.rating < 0.5 %}-o{% elif review.rating >= 0.5 and review.rating < 1 %}-half-o {% endif %}" aria-hidden="true"></i>
-						<i class="fa fa-star{% if review.rating < 1.5 %}-o{% elif review.rating >= 1.5 and review.rating < 2 %}-half-o {% endif %}" aria-hidden="true"></i>
-						<i class="fa fa-star{% if review.rating < 2.5 %}-o{% elif review.rating >= 2.5 and review.rating < 3 %}-half-o {% endif %}" aria-hidden="true"></i>
-						<i class="fa fa-star{% if review.rating < 3.5 %}-o{% elif review.rating >= 3.5 and review.rating < 4 %}-half-o {% endif %}" aria-hidden="true"></i>
-						<i class="fa fa-star{% if review.rating < 4.5 %}-o{% elif review.rating >= 4.5 and review.rating < 5 %}-half-o {% endif %}" aria-hidden="true"></i>
-						<span>{{review.rating}} stars</span>
-					</span>
-				</div>
-				
-			</div>
-		</div> <!-- icontext.// -->
-		<div class="mt-3">
-			<h6>{{review.subject}}</h6>
-			
-			<p>
-				{{review.review}}
-			</p>	
-		</div>
-	</article>
-	{% endfor %}
+    .cat-link {
+        display: block;
+        padding: 6px 0;
+        font-size: 14px;
+        color: var(--m-dark);
+        text-decoration: none;
+        transition: var(--transition);
+    }
+    .cat-link:hover { color: var(--m-pink); padding-left: 5px; }
 
-	
+    /* MODERN DUAL RANGE SLIDER */
+    .price-slider-ui {
+        padding: 10px 5px;
+    }
+    .slider-container {
+        position: relative;
+        height: 4px;
+        background: var(--m-border);
+        border-radius: 2px;
+        margin: 20px 0;
+    }
+    .slider-track {
+        position: absolute;
+        height: 100%;
+        background: var(--m-pink);
+        border-radius: 2px;
+    }
+    .range-input { position: relative; }
+    .range-input input {
+        position: absolute;
+        width: 100%;
+        height: 4px;
+        top: -24px;
+        background: none;
+        pointer-events: none;
+        -webkit-appearance: none;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+        height: 16px;
+        width: 16px;
+        border-radius: 50%;
+        background: #fff;
+        border: 1px solid var(--m-pink);
+        pointer-events: auto;
+        -webkit-appearance: none;
+        cursor: pointer;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    .price-values {
+        display: flex;
+        justify-content: space-between;
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--m-light-gray);
+    }
 
-	</div> <!-- col.// -->
-</div> <!-- row.// -->
+    /* SIZE OPTIONS */
+    .checkbox-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 10px;
+        cursor: pointer;
+        font-size: 14px;
+    }
+    .checkbox-item input { accent-color: var(--m-pink); width: 16px; height: 16px; }
 
+    .apply-btn {
+        width: 100%;
+        background: var(--m-pink);
+        color: white;
+        border: none;
+        padding: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        border-radius: 4px;
+        cursor: pointer;
+        margin-top: 15px;
+        transition: var(--transition);
+    }
+    .apply-btn:hover { background: #e63961; transform: translateY(-1px); }
 
-</div> <!-- container .//  -->
-</section>
-<!-- ========================= SECTION CONTENT END// ========================= -->
+    /* PRODUCT GRID */
+    .product-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+        gap: 30px;
+    }
+
+    .product-card {
+        text-decoration: none;
+        color: inherit;
+        background: #fff;
+        transition: var(--transition);
+        position: relative;
+    }
+    .product-card:hover { box-shadow: 0 8px 20px rgba(0,0,0,0.08); }
+
+    /* IMAGE FIX */
+    .image-wrapper {
+        aspect-ratio: 3 / 4;
+        overflow: hidden;
+        background: #f9f9f9;
+        position: relative;
+    }
+    .image-wrapper img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center;
+        transition: transform 0.6s ease;
+    }
+    .product-card:hover .image-wrapper img { transform: scale(1.05); }
+
+    /* STAR RATING COMPONENT */
+    .rating-container {
+        position: absolute;
+        bottom: 10px;
+        left: 10px;
+        background: rgba(255, 255, 255, 0.9);
+        padding: 3px 8px;
+        border-radius: 2px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 12px;
+        font-weight: 700;
+        z-index: 2;
+    }
+    .star-icon { color: var(--m-rating-green); font-size: 14px; }
+    .rating-divider { color: var(--m-border); font-weight: 300; margin: 0 2px; }
+
+    /* CARD INFO */
+    .card-info { padding: 12px 10px; }
+    .brand-name { font-size: 14px; font-weight: 700; color: var(--m-dark); margin: 0; }
+    .prod-title { font-size: 13px; color: var(--m-gray); margin: 4px 0 8px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    .price-row { display: flex; align-items: center; gap: 8px; }
+    .current-p { font-size: 14px; font-weight: 700; color: var(--m-dark); }
+    .old-p { font-size: 12px; color: var(--m-gray); text-decoration: line-through; }
+    .discount-p { font-size: 12px; color: #ff905a; font-weight: 700; }
+
+    /* MOBILE TOGGLE */
+    #filter-toggle { display: none; }
+
+    /* RESPONSIVE */
+    @media (max-width: 992px) {
+        .main-layout { grid-template-columns: 1fr; }
+        .filters-sidebar { display: none; }
+        .filters-sidebar.active {
+            display: block;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #fff; z-index: 1000; padding: 20px; overflow-y: auto;
+        }
+        #filter-toggle {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--m-border);
+            background: #fff;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+        .product-grid { grid-template-columns: repeat(2, 1fr); gap: 15px; }
+    }
+</style>
+
+<div class="store-container">
+    <nav class="breadcrumb-area">
+        <a href="/">Home</a> <span>/</span> <strong>Store</strong>
+    </nav>
+
+    <button id="filter-toggle" onclick="toggleSidebar()">FILTERS & CATEGORIES</button>
+
+    <div class="main-layout">
+        <aside class="filters-sidebar" id="sidebar">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span class="filter-title" style="margin-top:10px;">Filters</span>
+                <span onclick="toggleSidebar()" style="display:none; cursor:pointer;" id="close-sidebar">✕</span>
+            </div>
+
+            <form method="GET" action="">
+                {% for s in selected_sizes %}
+                <input type="hidden" name="size" value="{{ s }}">
+                {% endfor %}
+
+                <div class="filter-section">
+                    <span class="filter-title">Categories</span>
+                    <a href="{% url 'store' %}" class="cat-link" style="font-weight:700;">All Products</a>
+                    {% for category in links %}
+                    <a href="{{ category.get_url }}" class="cat-link">{{ category.category_name }}</a>
+                    {% endfor %}
+                </div>
+
+                <div class="filter-section">
+                    <span class="filter-title">Price Range</span>
+                    <div class="price-slider-ui">
+                        <div class="slider-container">
+                            <div class="slider-track" id="track"></div>
+                        </div>
+                        <div class="range-input">
+                            <input type="range" id="min-slider" min="0" max="10000" step="100" value="{{ request.GET.min_price|default:0 }}">
+                            <input type="range" id="max-slider" min="0" max="10000" step="100" value="{{ request.GET.max_price|default:10000 }}">
+                        </div>
+                        <div class="price-values">
+                            <span>₹<span id="min-label">0</span></span>
+                            <span>₹<span id="max-label">10000</span></span>
+                        </div>
+                    </div>
+                    <input type="hidden" name="min_price" id="min_price_hidden" value="{{ request.GET.min_price|default:0 }}">
+                    <input type="hidden" name="max_price" id="max_price_hidden" value="{{ request.GET.max_price|default:10000 }}">
+                </div>
+
+                <div class="filter-section" style="border-bottom:none;">
+                    <span class="filter-title">Size</span>
+                    {% for size in available_sizes %}
+                    <label class="checkbox-item">
+                        <input type="checkbox" name="size" value="{{ size }}" {% if size in selected_sizes %}checked{% endif %}>
+                        {{ size }}
+                    </label>
+                    {% endfor %}
+                    <button type="submit" class="apply-btn">Apply All</button>
+                </div>
+            </form>
+        </aside>
+
+        <main>
+            <div style="margin-bottom:20px; border-bottom:1px solid var(--m-border); padding-bottom:15px;">
+                <h2 style="font-size:18px; margin:0;">Collection <span style="font-weight:400; color:var(--m-gray); font-size:14px;">({{ product_count }} items)</span></h2>
+            </div>
+
+            <div class="product-grid">
+                {% for product in products %}
+                <a href="{{ product.get_url }}" class="product-card">
+                    <div class="image-wrapper">
+                        <img src="{{ product.image.url }}" alt="{{ product.product_name }}">
+                        
+                        {% if product.averageReview > 0 %}
+                        <div class="rating-container">
+                            <span>{{ product.averageReview }}</span>
+                            <span class="star-icon">★</span>
+                            <span class="rating-divider">|</span>
+                            <span style="color:var(--m-light-gray)">{{ product.countReview }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="card-info">
+                        <h3 class="brand-name">{{ product.product_name|truncatechars:20 }}</h3>
+                        <p class="prod-title">Premium Essentials Collection</p>
+                        
+                        <div class="price-row">
+                            <span class="current-p">₹{{ product.price }}</span>
+                            <span class="old-p">₹1,999</span>
+                            <span class="discount-p">(55% OFF)</span>
+                        </div>
+                        
+                        {% if not product.stock_status %}
+                        <div style="color:var(--m-pink); font-size:11px; font-weight:700; margin-top:8px;">OUT OF STOCK</div>
+                        {% endif %}
+                    </div>
+                </a>
+                {% empty %}
+                <div style="grid-column: 1/-1; text-align: center; padding: 100px 0;">
+                    <h3 style="color:var(--m-gray)">No results found for these filters.</h3>
+                </div>
+                {% endfor %}
+            </div>
+
+            {% if products.has_other_pages %}
+            <div style="display:flex; justify-content:center; margin-top:50px; padding-bottom:40px;">
+                <div style="display:flex; gap:10px; align-items:center;">
+                    {% if products.has_previous %}
+                    <a href="?page={{ products.previous_page_number }}{% if request.GET.min_price %}&min_price={{ request.GET.min_price }}{% endif %}{% if request.GET.max_price %}&max_price={{ request.GET.max_price }}{% endif %}{% for s in selected_sizes %}&size={{ s }}{% endfor %}" style="padding:10px 15px; border:1px solid var(--m-border); text-decoration:none; color:var(--m-dark); border-radius:4px;">Prev</a>
+                    {% endif %}
+
+                    {% for i in products.paginator.page_range %}
+                        {% if products.number == i %}
+                        <span style="padding:10px 18px; background:var(--m-dark); color:#fff; border-radius:4px; font-weight:700;">{{ i }}</span>
+                        {% elif i > products.number|add:'-3' and i < products.number|add:'3' %}
+                        <a href="?page={{ i }}{% if request.GET.min_price %}&min_price={{ request.GET.min_price }}{% endif %}{% if request.GET.max_price %}&max_price={{ request.GET.max_price }}{% endif %}{% for s in selected_sizes %}&size={{ s }}{% endfor %}" style="padding:10px 18px; border:1px solid var(--m-border); text-decoration:none; color:var(--m-dark); border-radius:4px;">{{ i }}</a>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if products.has_next %}
+                    <a href="?page={{ products.next_page_number }}{% if request.GET.min_price %}&min_price={{ request.GET.min_price }}{% endif %}{% if request.GET.max_price %}&max_price={{ request.GET.max_price }}{% endif %}{% for s in selected_sizes %}&size={{ s }}{% endfor %}" style="padding:10px 15px; border:1px solid var(--m-border); text-decoration:none; color:var(--m-dark); border-radius:4px;">Next</a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        </main>
+    </div>
+</div>
+
+<script>
+    /* DUAL RANGE SLIDER LOGIC */
+    const minSlider = document.getElementById('min-slider');
+    const maxSlider = document.getElementById('max-slider');
+    const minLabel = document.getElementById('min-label');
+    const maxLabel = document.getElementById('max-label');
+    const minHidden = document.getElementById('min_price_hidden');
+    const maxHidden = document.getElementById('max_price_hidden');
+    const track = document.getElementById('track');
+
+    function updateSlider() {
+        let minVal = parseInt(minSlider.value);
+        let maxVal = parseInt(maxSlider.value);
+
+        if (maxVal - minVal < 500) {
+            if (this === minSlider) {
+                minSlider.value = maxVal - 500;
+                minVal = maxVal - 500;
+            } else {
+                maxSlider.value = minVal + 500;
+                maxVal = minVal + 500;
+            }
+        }
+
+        minLabel.innerText = minVal.toLocaleString();
+        maxLabel.innerText = maxVal.toLocaleString();
+        minHidden.value = minVal;
+        maxHidden.value = maxVal;
+
+        const percent1 = (minVal / minSlider.max) * 100;
+        const percent2 = (maxVal / maxSlider.max) * 100;
+        track.style.left = percent1 + "%";
+        track.style.width = (percent2 - percent1) + "%";
+    }
+
+    minSlider.addEventListener('input', updateSlider);
+    maxSlider.addEventListener('input', updateSlider);
+
+    /* MOBILE SIDEBAR */
+    function toggleSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        const close = document.getElementById('close-sidebar');
+        sidebar.classList.toggle('active');
+        close.style.display = sidebar.classList.contains('active') ? 'block' : 'none';
+    }
+
+    window.addEventListener('load', () => {
+        updateSlider.call(minSlider);
+    });
+</script>
 
 {% endblock %}

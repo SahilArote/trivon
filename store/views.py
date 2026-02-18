@@ -1,6 +1,6 @@
 
 from django.shortcuts import render , get_object_or_404, redirect
-from .models import Product, ReviewRating
+from .models import Product, ReviewRating, Variation
 from category.models import Category
 from carts.models import CartItem
 from django.contrib import messages 
@@ -11,36 +11,64 @@ from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from orders.models import OrderProduct    
 
 # Create your views here.
-def store(request , category_slug=None):
+def store(request, category_slug=None):
+
+    products = Product.objects.filter(is_available=True)
     category = None
-    products = None
 
-    
-
-    if category_slug  != None:
+    # Category filter
+    if category_slug:
         category = get_object_or_404(Category, slug=category_slug)
-        products = Product.objects.filter(category=category, is_available=True)
-        product_count = products.count()
-        paginator = Paginator(products, 6)
-        page = request.GET.get('page')
-        paged_products = paginator.get_page(page)
-        
+        products = products.filter(category=category)
 
-    else:  
-        products = Product.objects.all().filter(is_available=True).order_by('id')
-        paginator = Paginator(products, 6)
-        page = request.GET.get('page')
-        paged_products = paginator.get_page(page)
-        product_count = products.count()   
-        
+    # 🔎 PRICE FILTER
+    min_price = request.GET.get('min_price')
+    max_price = request.GET.get('max_price')
+
+    try:
+        if min_price:
+            products = products.filter(price__gte=int(min_price))
+
+        if max_price:
+            products = products.filter(price__lte=int(max_price))
+    except (ValueError, TypeError):
+        pass
+
+    # 🔎 SIZE FILTER (only if category selected)
+    selected_sizes = request.GET.getlist('size')
+
+    if category and selected_sizes:
+        products = products.filter(
+            variation__variation_category='size',
+            variation__variation_value__in=selected_sizes,
+            variation__is_active=True
+        ).distinct()
+
+    # Pagination
+    paginator = Paginator(products.order_by('id'), 6)
+    page = request.GET.get('page')
+    paged_products = paginator.get_page(page)
+
+    # ✅ Show sizes ONLY when category is selected
+    if category:
+        available_sizes = Variation.objects.filter(
+            product__category=category,
+            variation_category='size',
+            is_active=True
+        ).values_list('variation_value', flat=True).distinct()
+    else:
+        available_sizes = None
+
     context = {
-        
         'products': paged_products,
-        'product_count': product_count,
-
+        'product_count': products.count(),
+        'available_sizes': available_sizes,
+        'selected_sizes': selected_sizes,
     }
 
     return render(request, 'store/store.html', context)
+
+
 
 def product_detail(request, category_slug, product_slug):
     try:
