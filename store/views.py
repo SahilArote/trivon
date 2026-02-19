@@ -78,6 +78,7 @@ def product_detail(request, category_slug, product_slug):
     except Exception as e:
         raise e
     
+    related_products = Product.objects.filter(category=single_product.category).exclude(id=single_product.id)[:5]
     if request.user.is_authenticated:
         try:
             orderproduct = OrderProduct.objects.filter(user=request.user, product_id=single_product.id).exists()
@@ -95,6 +96,7 @@ def product_detail(request, category_slug, product_slug):
         'in_cart': in_cart,
         'orderproduct': orderproduct,
         'reviews': reviews,
+        'related_products': related_products,
     } 
 
     return render(request, 'store/product_detail.html', context)
@@ -137,7 +139,7 @@ def submit_review(request, product_id):
             if form.is_valid():
                 data = ReviewRating()
                 data.subject = form.cleaned_data['subject']
-                data.rating = form.cleaned_data[' ']
+                data.rating = form.cleaned_data['rating']
                 data.review = form.cleaned_data['review']
                 data.ip = request.META.get('REMOTE_ADDR')
                 data.product_id = product_id

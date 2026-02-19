@@ -1,179 +1,165 @@
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
 <style>
-/* ================= SIDEBAR ================= */
-.dashboard-sidebar {
-    width: 260px;
-    background: #ffffff;
-    padding: 20px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+/* ================= MYNTRA-STYLE SIDEBAR & MOBILE NAV ================= */
+:root {
+    --m-pink: #ff3f6c;
+    --m-dark: #282c3f;
+    --m-gray: #94969f;
+    --m-border: #eaeaec;
 }
 
-/* Menu */
+/* Mobile Header Fix */
+.mobile-account-nav {
+    display: none;
+    padding: 15px 20px;
+    background: #fff;
+    border-bottom: 1px solid var(--m-border);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.dashboard-sidebar {
+    width: 260px;
+    background: #fff;
+    border-right: 1px solid var(--m-border);
+}
+
+.sidebar-heading {
+    padding: 20px;
+    border-bottom: 1px solid var(--m-border);
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--m-gray);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
 .dashboard-menu {
     list-style: none;
-    padding: 0;
+    padding: 10px 0;
     margin: 0;
 }
 
 .dashboard-menu a {
-    display: block;
-    padding: 12px 15px;
-    margin-bottom: 8px;
-    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    padding: 12px 20px;
+    color: var(--m-dark);
     text-decoration: none;
-    font-size: 15px;
-    color: #333;
-    transition: background 0.25s ease, color 0.25s ease;
+    font-size: 14px;
+    border-left: 3px solid transparent;
+    transition: 0.2s;
+}
+
+.dashboard-menu a i {
+    margin-right: 15px;
+    width: 20px;
+    color: #686b78;
 }
 
 .dashboard-menu a:hover {
-    background: #f3f4f6;
+    background: #f5f5f6;
+    color: var(--m-pink);
 }
 
 .dashboard-menu a.active {
-    background: #111827;
-    color: #fff;
+    background: #f5f5f6;
+    color: var(--m-pink);
+    font-weight: 700;
+    border-left-color: var(--m-pink);
 }
 
-/* Logout */
+.dashboard-menu a.active i { color: var(--m-pink); }
+
+.logout-box {
+    padding: 20px;
+    border-top: 1px solid var(--m-border);
+}
+
 .logout-btn {
     display: block;
-    margin-top: 20px;
-    padding: 12px;
+    padding: 10px;
     text-align: center;
-    border-radius: 8px;
+    color: var(--m-dark);
+    border: 1px solid var(--m-border);
     text-decoration: none;
-    background: #f8f8f8;
-    color: #e63946;
-    font-weight: 500;
+    font-size: 12px;
+    font-weight: 700;
+    border-radius: 4px;
 }
 
-
-/* ================= MOBILE HEADER ================= */
-.mobile-header {
-    display: none;
-    align-items: center;
-    justify-content: space-between;
-    padding: 12px 4px;
-    margin-bottom: 12px;
-}
-
-.mobile-title {
-    font-size: 17px;
-    font-weight: 600;
-    color: #111827;
-}
-
-/* Menu Button */
-.menu-btn {
-    width: 42px;
-    height: 42px;
-    background: transparent;
-    border: none;
-    border-radius: 8px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    gap: 4px;
-    cursor: pointer;
-    transition: background 0.2s ease, transform 0.15s ease;
-}
-
-.menu-btn span {
-    width: 20px;
-    height: 2px;
-    background: #111827;
-    border-radius: 2px;
-}
-
-.menu-btn:hover {
-    background: rgba(0,0,0,0.05);
-}
-
-.menu-btn:active {
-    transform: scale(0.96);
-}
-
-/* ================= OVERLAY ================= */
-.sidebar-overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.4);
-    z-index: 1000;
-}
-
-/* ================= MOBILE BEHAVIOR ================= */
+/* ================= MOBILE SYSTEM FIXES ================= */
 @media (max-width: 768px) {
-
-    .mobile-header {
-        display: flex;
-    }
+    .mobile-account-nav { display: flex; }
 
     .dashboard-sidebar {
         position: fixed;
         top: 0;
-        left: -100%;
+        left: -100%; /* Fully hidden */
         height: 100vh;
-        z-index: 1001;
-        transition: left 0.3s ease;
+        width: 280px;
+        z-index: 9999; /* Higher than everything */
+        transition: transform 0.3s ease;
+        visibility: hidden;
+        border-right: none;
     }
 
     .dashboard-sidebar.open {
-        left: 0;
+        transform: translateX(145%);
+        visibility: visible;
     }
 
-    .sidebar-overlay.show {
-        display: block;
+    .sidebar-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(40, 44, 63, 0.8);
+        z-index: 9998; /* Just below sidebar */
+        backdrop-filter: blur(4px);
     }
+
+    .sidebar-overlay.show { display: block; }
 }
 </style>
 
-<!-- Mobile Header -->
-<div class="mobile-header">
-    <span class="mobile-title">My Account</span>
-    <button class="menu-btn" onclick="toggleSidebar()" aria-label="Open menu">
-        <span></span>
-        <span></span>
-        <span></span>
+<div class="mobile-account-nav">
+    <span style="font-weight: 700; font-size: 16px;">MY ACCOUNT</span>
+    <button onclick="toggleSidebar()" style="background:none; border:none; font-size:20px;">
+        <i class="fa fa-bars"></i>
     </button>
 </div>
 
-<!-- Overlay -->
 <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
 
-<!-- Sidebar -->
 <aside class="dashboard-sidebar" id="dashboardSidebar">
-    <ul class="dashboard-menu">
-        <a href="{% url 'dashboard' %}"
-           class="{% if '/accounts/' == request.path or '/accounts/dashboard/' == request.path %}active{% endif %}">
-            Dashboard
+    <div class="sidebar-heading">Account Overview</div>
+    <nav class="dashboard-menu">
+        <a href="{% url 'dashboard' %}" class="{% if '/dashboard/' in request.path %}active{% endif %}">
+            <i class="fa fa-th-large"></i> Overview
         </a>
-
-        <a href="{% url 'my_orders' %}"
-           class="{% if '/my_orders/' in request.path %}active{% endif %}">
-            My Orders
+        <a href="{% url 'my_orders' %}" class="{% if '/my_orders/' in request.path %}active{% endif %}">
+            <i class="fa fa-shopping-bag"></i> Orders
         </a>
-
-        <a href="{% url 'edit_profile' %}"
-           class="{% if '/edit_profile/' in request.path %}active{% endif %}">
-            Edit Profile
+        <a href="{% url 'edit_profile' %}" class="{% if '/edit_profile/' in request.path %}active{% endif %}">
+            <i class="fa fa-user"></i> Profile Details
         </a>
-
-        <a href="{% url 'change_password' %}"
-           class="{% if '/change_password/' in request.path %}active{% endif %}">
-            Change Password
+        <a href="{% url 'change_password' %}" class="{% if '/change_password/' in request.path %}active{% endif %}">
+            <i class="fa fa-lock"></i> Change Password
         </a>
-    </ul>
-
-    <a href="{% url 'logout' %}" class="logout-btn">Log out</a>
+    </nav>
+    <div class="logout-box">
+        <a href="{% url 'logout' %}" class="logout-btn">LOG OUT</a>
+    </div>
 </aside>
 
 <script>
 function toggleSidebar() {
     const sidebar = document.getElementById('dashboardSidebar');
     const overlay = document.getElementById('sidebarOverlay');
-
     sidebar.classList.toggle('open');
     overlay.classList.toggle('show');
 }

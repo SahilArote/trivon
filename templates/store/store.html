@@ -3,24 +3,25 @@
 {% block content %}
 
 <style>
-    /* ================= MYNTRA-INSPIRED PREMIUM UI ================= */
+    /* ================= GLOBAL PREMIUM THEME ================= */
     :root {
         --m-pink: #ff3f6c;
         --m-dark: #282c3f;
         --m-gray: #94969f;
+        --m-light-gray: #535766;
         --m-border: #eaeaec;
+        --m-rating-green: #14958f;
         --m-bg: #ffffff;
         --m-soft-bg: #f5f5f6;
-        --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
-        --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
         --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
     }
 
     body {
         background-color: var(--m-bg);
-        font-family: 'Assistant', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        font-family: 'Assistant', sans-serif;
         color: var(--m-dark);
-        -webkit-font-smoothing: antialiased;
+        margin: 0;
     }
 
     .store-wrapper {
@@ -30,14 +31,12 @@
     }
 
     /* BREADCRUMB */
-    .breadcrumb {
+    .breadcrumb-nav {
         font-size: 14px;
         margin: 10px 0 25px 0;
-        color: var(--m-dark);
-        font-weight: 400;
     }
-    .breadcrumb a { color: var(--m-dark); text-decoration: none; font-weight: 700; }
-    .breadcrumb span { color: var(--m-gray); margin: 0 8px; }
+    .breadcrumb-nav a { color: var(--m-dark); text-decoration: none; font-weight: 700; }
+    .breadcrumb-nav span { color: var(--m-gray); margin: 0 8px; }
 
     /* LAYOUT GRID */
     .store-grid {
@@ -46,24 +45,10 @@
         gap: 40px;
     }
 
-    /* SIDEBAR FILTERS */
+    /* ================= SIDEBAR & FILTERS ================= */
     .sidebar {
         border-right: 1px solid var(--m-border);
         padding-right: 20px;
-    }
-
-    .filter-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 20px;
-    }
-
-    .filter-header h3 {
-        font-size: 16px;
-        font-weight: 700;
-        text-transform: uppercase;
-        margin: 0;
     }
 
     .filter-group {
@@ -71,31 +56,25 @@
         border-top: 1px solid var(--m-border);
     }
 
+    .filter-group:last-child { border-bottom: none; }
+
     .filter-title {
         font-size: 14px;
         font-weight: 700;
+        text-transform: uppercase;
         margin-bottom: 15px;
         display: block;
-        color: var(--m-dark);
     }
 
-    /* CATEGORIES & LISTS */
     .cat-list { list-style: none; padding: 0; margin: 0; }
-    .cat-list li { margin-bottom: 8px; }
     .cat-list a { 
-        text-decoration: none; 
-        color: var(--m-dark); 
-        font-size: 14px; 
-        transition: var(--transition);
-        display: block;
+        text-decoration: none; color: var(--m-dark); font-size: 14px; 
+        display: block; padding: 5px 0; transition: var(--transition);
     }
     .cat-list a:hover { color: var(--m-pink); padding-left: 5px; }
 
-    /* MODERN PRICE SLIDER */
-    .price-slider-ui {
-        padding: 10px 5px;
-    }
-
+    /* MOBILE SLIDER FIXES */
+    .price-slider-ui { padding: 10px 5px; }
     .range-slider {
         position: relative;
         height: 4px;
@@ -103,15 +82,14 @@
         border-radius: 2px;
         margin: 20px 0;
     }
-
     .slider-track {
         position: absolute;
         height: 100%;
         background: var(--m-pink);
         border-radius: 2px;
+        z-index: 1;
     }
-
-    .range-input { position: relative; }
+    .range-input { position: relative; height: 4px; }
     .range-input input {
         position: absolute;
         width: 100%;
@@ -120,83 +98,28 @@
         background: none;
         pointer-events: none;
         -webkit-appearance: none;
+        z-index: 2;
     }
-
     input[type="range"]::-webkit-slider-thumb {
-        height: 16px;
-        width: 16px;
-        border-radius: 50%;
-        background: var(--m-pink);
-        border: none;
-        pointer-events: auto;
-        -webkit-appearance: none;
-        cursor: pointer;
-        box-shadow: 0 0 0 4px rgba(255, 63, 108, 0.1);
+        height: 22px; width: 22px; border-radius: 50%;
+        background: #fff; border: 1px solid var(--m-pink);
+        pointer-events: auto; -webkit-appearance: none;
+        cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.2);
     }
 
-    .price-display-wrapper {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-top: 15px;
+    .price-display {
+        display: flex; justify-content: space-between; align-items: center; margin-top: 15px;
     }
-
-    .price-label {
-        font-size: 13px;
-        color: var(--m-gray);
-        font-weight: 600;
-    }
-
-    /* CUSTOM CHECKBOXES */
-    .size-option {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        font-size: 14px;
-        margin-bottom: 10px;
-        cursor: pointer;
-        color: var(--m-dark);
-        transition: var(--transition);
-    }
-    
-    .size-option input[type="checkbox"] {
-        accent-color: var(--m-pink);
-        width: 16px;
-        height: 16px;
-    }
+    .price-label { font-size: 13px; font-weight: 700; color: var(--m-dark); }
 
     .btn-apply {
-        width: 100%;
-        background: var(--m-pink);
-        color: white;
-        border: none;
-        padding: 12px;
-        font-size: 12px;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        cursor: pointer;
-        border-radius: 4px;
-        margin-top: 15px;
-        transition: var(--transition);
+        width: 100%; background: var(--m-pink); color: white; border: none;
+        padding: 12px; font-weight: 700; text-transform: uppercase;
+        border-radius: 4px; cursor: pointer; margin-top: 15px; transition: var(--transition);
     }
     .btn-apply:hover { background: #e63961; transform: translateY(-1px); box-shadow: var(--shadow-md); }
 
-    /* CONTENT AREA */
-    .content-area {
-        min-height: 800px;
-    }
-
-    .grid-header {
-        padding: 0 0 20px 10px;
-        border-bottom: 1px solid var(--m-border);
-        margin-bottom: 25px;
-    }
-
-    .grid-header h2 { font-size: 18px; font-weight: 700; color: var(--m-dark); margin: 0; }
-    .grid-header span { font-weight: 400; color: var(--m-gray); margin-left: 10px; }
-
-    /* PRODUCT GRID */
+    /* ================= PRODUCT GRID & CARDS ================= */
     .product-grid {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
@@ -204,153 +127,123 @@
     }
 
     .product-card {
-        text-decoration: none;
-        color: inherit;
-        position: relative;
-        transition: var(--transition);
-        background: #fff;
-        border-radius: 0;
+        text-decoration: none; color: inherit; position: relative;
+        transition: var(--transition); background: #fff;
     }
-
-    .product-card:hover {
-        box-shadow: var(--shadow-md);
-    }
+    .product-card:hover { box-shadow: var(--shadow-md); transform: translateY(-5px); }
 
     .img-container {
-        aspect-ratio: 3/4;
-        overflow: hidden;
-        background-color: var(--m-soft-bg);
-        position: relative;
+        aspect-ratio: 3/4; overflow: hidden; background: var(--m-soft-bg); position: relative;
     }
+    .img-container img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s ease; }
+    .product-card:hover img { transform: scale(1.06); }
 
-    .img-container img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        transition: transform 0.5s ease;
+    /* RATING BADGE ON IMAGE */
+    .card-rating-badge {
+        position: absolute; bottom: 10px; left: 10px;
+        background: rgba(255, 255, 255, 0.9); padding: 2px 6px;
+        border-radius: 2px; display: flex; align-items: center;
+        gap: 4px; font-size: 12px; font-weight: 700; z-index: 2;
     }
+    .card-rating-badge .star-icon { color: var(--m-rating-green); font-size: 14px; }
 
-    .product-card:hover img {
-        transform: scale(1.05);
-    }
+    .card-details { padding: 12px 10px; }
+    .p-brand { font-size: 14px; font-weight: 700; margin-bottom: 2px; }
+    .p-name { font-size: 13px; color: var(--m-gray); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; margin-bottom: 8px; }
 
-    .card-details {
-        padding: 12px 10px;
-    }
-
-    .p-name {
-        font-size: 14px;
-        font-weight: 700;
-        margin-bottom: 5px;
-        color: var(--m-dark);
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-
-    .p-desc {
-        font-size: 13px;
-        color: var(--m-gray);
-        margin-bottom: 8px;
-        line-height: 1.2;
-        display: -webkit-box;
-        -webkit-line-clamp: 1;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-    }
-
-    .price-meta {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-    }
-
-    .p-price { font-size: 14px; font-weight: 700; color: var(--m-dark); }
+    .price-meta { display: flex; align-items: center; gap: 8px; }
+    .p-price { font-size: 14px; font-weight: 700; }
     .p-old { font-size: 12px; color: var(--m-gray); text-decoration: line-through; }
     .p-off { font-size: 12px; color: #ff905a; font-weight: 700; }
 
-    .stock-badge {
-        font-size: 10px;
+    /* ================= NO RESULTS UI ================= */
+    .no-results-container {
+        grid-column: 1 / -1;
+        text-align: center;
+        padding: 80px 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        background: #fff;
+    }
+
+    .no-results-icon {
+        width: 180px;
+        margin-bottom: 30px;
+        opacity: 0.8;
+    }
+
+    .no-results-title {
+        font-size: 24px;
+        font-weight: 700;
+        color: var(--m-dark);
+        margin-bottom: 10px;
+    }
+
+    .no-results-text {
+        font-size: 16px;
+        color: var(--m-gray);
+        margin-bottom: 30px;
+        max-width: 400px;
+        line-height: 1.5;
+    }
+
+    .btn-reset {
+        display: inline-block;
+        padding: 12px 35px;
+        border: 1px solid var(--m-pink);
+        color: var(--m-pink);
+        text-decoration: none;
         font-weight: 700;
         text-transform: uppercase;
-        margin-top: 10px;
-        display: inline-block;
-        padding: 2px 6px;
-        background: var(--m-soft-bg);
-    }
-    .in { color: #03a685; }
-    .out { color: #ff3f6c; }
-
-    /* PAGINATION */
-    .pagination-nav {
-        display: flex;
-        justify-content: center;
-        padding: 50px 0;
-    }
-
-    .pagination-list {
-        display: flex;
-        list-style: none;
-        gap: 10px;
-        align-items: center;
-    }
-
-    .pagination-list a, .pagination-list span {
-        padding: 10px 18px;
-        text-decoration: none;
-        color: var(--m-dark);
-        font-weight: 700;
         font-size: 14px;
-        border: 1px solid var(--m-border);
         border-radius: 4px;
         transition: var(--transition);
     }
 
-    .pagination-list .active {
-        background: var(--m-dark);
-        color: white;
-        border-color: var(--m-dark);
+    .btn-reset:hover {
+        background: var(--m-pink);
+        color: #fff;
     }
 
-    .pagination-list a:hover:not(.active) {
-        border-color: var(--m-dark);
+    /* ================= MOBILE RESPONSIVE ================= */
+    #mobile-filter-trigger {
+        display: none; align-items: center; justify-content: center;
+        width: 100%; padding: 15px; border: 1px solid var(--m-border);
+        background: white; font-weight: 700; margin-bottom: 20px; cursor: pointer;
     }
-
-    /* MOBILE OFF-CANVAS / RESPONSIVE */
-    #mobile-filter-trigger { display: none; }
 
     @media (max-width: 992px) {
         .store-grid { grid-template-columns: 1fr; }
         .sidebar { display: none; }
         .sidebar.active {
-            display: block;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: white; z-index: 1000;
-            padding: 20px;
-            overflow-y: auto;
+            display: block; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: white; z-index: 1000; padding: 20px; overflow-y: auto;
         }
-        #mobile-filter-trigger {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 100%;
-            padding: 15px;
-            border: 1px solid var(--m-border);
-            background: white;
-            font-weight: 700;
-            margin-bottom: 20px;
-            cursor: pointer;
-        }
+        #mobile-filter-trigger { display: flex; }
         .product-grid { grid-template-columns: repeat(2, 1fr); gap: 15px; }
         .store-wrapper { padding: 10px; }
+        
+        .no-results-icon { width: 140px; }
+        .no-results-title { font-size: 20px; }
+        .no-results-text { font-size: 14px; }
     }
+
+    /* ================= FOOTER ================= */
+    .site-footer {
+        background: #1e2029; color: #94969f; padding: 60px 0 30px;
+        margin-top: 50px; border-top: 1px solid rgba(255,255,255,0.05);
+    }
+    .footer-title { font-size: 13px; font-weight: 700; color: #fff; margin-bottom: 25px; text-transform: uppercase; }
+    .footer-links li { margin-bottom: 12px; list-style: none; }
+    .footer-links a { color: #94969f; text-decoration: none; font-size: 14px; transition: 0.3s; }
+    .footer-links a:hover { color: #fff; padding-left: 5px; }
 </style>
 
 <div class="store-wrapper">
-    <div class="breadcrumb">
+    <nav class="breadcrumb-nav">
         <a href="/">Home</a> <span>/</span> <strong>Store</strong>
-    </div>
+    </nav>
 
     <div id="mobile-filter-trigger" onclick="toggleMobileFilter()">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:8px"><path d="M4 6h16M4 12h16M4 18h7"/></svg>
@@ -359,12 +252,16 @@
 
     <div class="store-grid">
         <aside class="sidebar" id="sidebar">
-            <div class="filter-header">
-                <h3>Filters</h3>
-                <span class="close-mobile" onclick="toggleMobileFilter()" style="display:none; cursor:pointer">✕</span>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <h3 style="font-size:16px; font-weight:700; margin:0;">FILTERS</h3>
+                <span onclick="toggleMobileFilter()" style="cursor:pointer; font-size:20px; display:none;" id="close-mobile">✕</span>
             </div>
 
             <form method="GET" action="">
+                {% for s in selected_sizes %}
+                <input type="hidden" name="size" value="{{ s }}">
+                {% endfor %}
+
                 <div class="filter-group">
                     <span class="filter-title">Categories</span>
                     <ul class="cat-list">
@@ -376,31 +273,28 @@
                 </div>
 
                 <div class="filter-group">
-                    <span class="filter-title">Price Range</span>
+                    <span class="filter-title">Price</span>
                     <div class="price-slider-ui">
-                        <div class="range-slider">
-                            <div class="slider-track" id="track"></div>
-                        </div>
+                        <div class="range-slider"><div class="slider-track" id="track"></div></div>
                         <div class="range-input">
                             <input type="range" id="min-slider" min="0" max="10000" step="100" value="{{ request.GET.min_price|default:0 }}">
                             <input type="range" id="max-slider" min="0" max="10000" step="100" value="{{ request.GET.max_price|default:10000 }}">
                         </div>
-                        <div class="price-display-wrapper">
+                        <div class="price-display">
                             <div class="price-label">₹<span id="min-label">0</span></div>
                             <div class="price-label">₹<span id="max-label">10000</span></div>
                         </div>
                     </div>
-
                     <input type="hidden" name="min_price" id="min_price_hidden" value="{{ request.GET.min_price|default:0 }}">
                     <input type="hidden" name="max_price" id="max_price_hidden" value="{{ request.GET.max_price|default:10000 }}">
                 </div>
 
                 <div class="filter-group">
                     <span class="filter-title">Size</span>
-                    <div style="max-height: 250px; overflow-y: auto;">
+                    <div style="max-height:200px; overflow-y:auto;">
                         {% for size in available_sizes %}
-                        <label class="size-option">
-                            <input type="checkbox" name="size" value="{{ size }}" {% if size in selected_sizes %}checked{% endif %}>
+                        <label style="display:flex; align-items:center; gap:10px; margin-bottom:8px; cursor:pointer; font-size:14px;">
+                            <input type="checkbox" name="size" value="{{ size }}" {% if size in selected_sizes %}checked{% endif %} style="accent-color:var(--m-pink); width:16px; height:16px;">
                             {{ size }}
                         </label>
                         {% endfor %}
@@ -410,68 +304,46 @@
             </form>
         </aside>
 
-        <main class="content-area">
-            <div class="grid-header">
-                <h2>Our Collection <span>({{ product_count }} items)</span></h2>
-            </div>
-
+        <main>
             <div class="product-grid">
                 {% for product in products %}
                 <a href="{{ product.get_url }}" class="product-card">
                     <div class="img-container">
                         <img src="{{ product.image.url }}" alt="{{ product.product_name }}">
+                        {% if product.averageReview > 0 %}
+                        <div class="card-rating-badge">
+                            <span>{{ product.averageReview|floatformat:1 }}</span>
+                            <span class="star-icon">★</span>
+                            <span style="color:#d4d5d9; margin: 0 2px;">|</span>
+                            <span>{{ product.countReview }}</span>
+                        </div>
+                        {% endif %}
                     </div>
                     <div class="card-details">
-                        <div class="p-name">{{ product.product_name }}</div>
-                        <div class="p-desc">Premium Quality Essentials</div>
+                        <div class="p-brand">{{ product.product_name|truncatechars:18 }}</div>
+                        <span class="p-name">Fashion Essentials</span>
                         <div class="price-meta">
                             <span class="p-price">₹{{ product.price }}</span>
-                            <span class="p-old">₹999</span>
-                            <span class="p-off">(60% OFF)</span>
+                            <span class="p-old">₹1,999</span>
+                            <span class="p-off">(50% OFF)</span>
                         </div>
-                        {% if product.stock_status %}
-                        <div class="stock-badge in">In Stock</div>
-                        {% else %}
-                        <div class="stock-badge out">Out of Stock</div>
-                        {% endif %}
                     </div>
                 </a>
                 {% empty %}
-                <div style="grid-column: 1/-1; text-align: center; padding: 100px 0;">
-                    <img src="https://constant.myntassets.com/checkout/assets/img/empty-bag.webp" width="150" style="margin-bottom:20px; opacity:0.6">
-                    <h3 style="color:var(--m-gray)">No results found</h3>
-                    <p style="color:var(--m-gray)">Try adjusting your filters to find what you are looking for.</p>
+                <div class="no-results-container">
+                    <img src="https://constant.myntassets.com/checkout/assets/img/empty-bag.webp" alt="No results" class="no-results-icon">
+                    <h3 class="no-results-title">No results found!</h3>
+                    <p class="no-results-text">We couldn't find any products matching your current filters. Try adjusting your price range or selecting different sizes.</p>
+                    <a href="{% url 'store' %}" class="btn-reset">Clear All Filters</a>
                 </div>
                 {% endfor %}
             </div>
-
-            {% if products.has_other_pages %}
-            <nav class="pagination-nav">
-                <div class="pagination-list">
-                    {% if products.has_previous %}
-                        <a href="?page={{ products.previous_page_number }}{% if request.GET.min_price %}&min_price={{ request.GET.min_price }}{% endif %}{% if request.GET.max_price %}&max_price={{ request.GET.max_price }}{% endif %}{% for s in selected_sizes %}&size={{ s }}{% endfor %}">Previous</a>
-                    {% endif %}
-                    
-                    {% for i in products.paginator.page_range %}
-                        {% if products.number == i %}
-                            <span class="active">{{ i }}</span>
-                        {% elif i > products.number|add:'-3' and i < products.number|add:'3' %}
-                            <a href="?page={{ i }}{% if request.GET.min_price %}&min_price={{ request.GET.min_price }}{% endif %}{% if request.GET.max_price %}&max_price={{ request.GET.max_price }}{% endif %}{% for s in selected_sizes %}&size={{ s }}{% endfor %}">{{ i }}</a>
-                        {% endif %}
-                    {% endfor %}
-
-                    {% if products.has_next %}
-                        <a href="?page={{ products.next_page_number }}{% if request.GET.min_price %}&min_price={{ request.GET.min_price }}{% endif %}{% if request.GET.max_price %}&max_price={{ request.GET.max_price }}{% endif %}{% for s in selected_sizes %}&size={{ s }}{% endfor %}">Next</a>
-                    {% endif %}
-                </div>
-            </nav>
-            {% endif %}
         </main>
     </div>
 </div>
 
 <script>
-    /* PRICE SLIDER LOGIC */
+    /* DUAL SLIDER LOGIC */
     const minSlider = document.getElementById('min-slider');
     const maxSlider = document.getElementById('max-slider');
     const minLabel = document.getElementById('min-label');
@@ -483,15 +355,11 @@
     function updateSlider() {
         let minVal = parseInt(minSlider.value);
         let maxVal = parseInt(maxSlider.value);
+        const gap = 500;
 
-        if (maxVal - minVal < 500) {
-            if (this === minSlider) {
-                minSlider.value = maxVal - 500;
-                minVal = maxVal - 500;
-            } else {
-                maxSlider.value = minVal + 500;
-                maxVal = minVal + 500;
-            }
+        if (maxVal - minVal < gap) {
+            if (this === minSlider) { minSlider.value = maxVal - gap; minVal = maxVal - gap; }
+            else { maxSlider.value = minVal + gap; maxVal = minVal + gap; }
         }
 
         minLabel.innerText = minVal.toLocaleString();
@@ -508,20 +376,12 @@
     minSlider.addEventListener('input', updateSlider);
     maxSlider.addEventListener('input', updateSlider);
 
-    /* MOBILE FILTER TOGGLE */
+    /* MOBILE TOGGLE */
     function toggleMobileFilter() {
-        const sidebar = document.getElementById('sidebar');
-        const closeBtn = document.querySelector('.close-mobile');
-        sidebar.classList.toggle('active');
-        closeBtn.style.display = sidebar.classList.contains('active') ? 'block' : 'none';
+        document.getElementById('sidebar').classList.toggle('active');
+        document.getElementById('close-mobile').style.display = document.getElementById('sidebar').classList.contains('active') ? 'block' : 'none';
     }
 
-    window.addEventListener('load', () => {
-        updateSlider.call(minSlider);
-        if(window.innerWidth <= 992) {
-            document.querySelector('.close-mobile').style.display = 'none';
-        }
-    });
+    window.onload = () => updateSlider.call(minSlider);
 </script>
-
 {% endblock %}
