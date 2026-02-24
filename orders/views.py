@@ -8,6 +8,8 @@ from django.core.mail import EmailMessage
 from django.template.loader import render_to_string
 import datetime 
 import json
+from .services.shiprocket import create_shiprocket_order
+
 
 # Create your views here.
 
@@ -16,71 +18,81 @@ import json
 
 def payments(request):
     body = json.loads(request.body)
-    order = Order.objects.get(user=request.user, is_ordered=False, order_number=body['orderID'])
-    #store the details in the db
-    payment = Payment(
-        user = request.user,
-        payment_id = body['transID'],
-        payment_method = body['payment_method'],
-        amount_paid = order.order_total,
-        status = body['status'],
 
+    order = Order.objects.get(
+        user=request.user,
+        is_ordered=False,
+        order_number=body['orderID']
+    )
+
+    # Store payment details
+    payment = Payment(
+        user=request.user,
+        payment_id=body['transID'],
+        payment_method=body['payment_method'],
+        amount_paid=order.order_total,
+        status=body['status'],
     )
     payment.save()
 
     order.payment = payment
-    order.is_ordered =True
+    order.is_ordered = True
     order.save()
 
-    #move to order product
-    cart_items = CartItem.objects.filter(user=request.user) 
+    # Move cart items to OrderProduct
+    cart_items = CartItem.objects.filter(user=request.user)
 
     for item in cart_items:
-        orderproduct = OrderProduct()
-        orderproduct.order_id = order.id
-        orderproduct.payment = payment
-        orderproduct.user_id = request.user.id
-        orderproduct.product_id = item.product_id
-        orderproduct.quantity = item.quantity
-        orderproduct.product_price = item.product.price
-        orderproduct.ordered = True
-        orderproduct.save()
+        orderproduct = OrderProduct.objects.create(
+            order=order,
+            payment=payment,
+            user=request.user,
+            product=item.product,
+            quantity=item.quantity,
+            product_price=item.product.price,
+            ordered=True,
+        )
 
-        cart_item = CartItem.objects.get(id=item.id)
-        product_variation = cart_item.variation.all()
-        orderproduct = OrderProduct.objects.get(id=orderproduct.id)
-        orderproduct.variations.set(product_variation)
-        orderproduct.save() 
+        orderproduct.variations.set(item.variation.all())
 
-        # (-) the quantity of the solde product
-        product = Product.objects.get(id=item.product_id)
+        # Reduce stock
+        product = item.product
         product.stock -= item.quantity
         product.save()
 
-
-    #deleting the cart after payment
+    # Clear cart
     CartItem.objects.filter(user=request.user).delete()
 
-    #send order recived email 
-    mail_subject = 'Thank you for Order'
+    # 🚚 SHIPROCKET INTEGRATION START
+    if body['status'] == "COMPLETED":   # change if your success value is different
+        print("Payment Status:", body['status'])
+
+        response = create_shiprocket_order(order)
+        print("Shiprocket Response:", response)
+
+        if response.get("shipment_id"):
+            order.shiprocket_shipment_id = response.get("shipment_id")
+            order.shiprocket_order_id = response.get("order_id")
+            order.save()
+
+        else:
+            print("Shiprocket Error:", response)
+    # 🚚 SHIPROCKET INTEGRATION END
+
+    # Send confirmation email
+    mail_subject = 'Thank you for your Order'
     message = render_to_string('orders/order_recieved_email.html', {
-        'user' : request.user,
+        'user': request.user,
         'order': order,
-
-
     })
-    to_email = request.user.email
-    send_email = EmailMessage(mail_subject, message, to=[to_email] )
+
+    send_email = EmailMessage(mail_subject, message, to=[request.user.email])
     send_email.send()
 
-    #sending tran id and order no to the senddata method by json that is in payments.html
-    data ={
-        'order_number' : order.order_number,
+    return JsonResponse({
+        'order_number': order.order_number,
         'transID': payment.payment_id,
-
-    }
-    return JsonResponse(data)
-
+    })
 
 def place_order(request, totel=0 , quantity=0 ):
     current_user = request.user

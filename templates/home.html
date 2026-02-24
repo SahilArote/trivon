@@ -1,76 +1,119 @@
-
 {% extends 'base.html' %}
 {% load static %}
 {% block content %}
 <style>
 
-.section-intro {
-    margin-bottom: 60px;
-    
-}
-    /* Desktop me categories ke beech extra gap */
-@media (min-width: 992px) {
-    .categories-scroll {
-        justify-content: center;   /* center alignment */
-        gap: 35px;                 /* yaha gap control karo */
-    }
-}
-/* FIX: Mobile banner unwanted gap remove */
-@media (max-width: 576px) {
-
-    .banner_container {
-        margin: 0 !important;
-        padding: 0 !important;
-    }
-
-    .banner_image {
-        display: block;
-        width: 100%;
-        height: auto;
-    }
-
     .section-intro {
-        margin: 0 !important;
-        padding: 0 !important;
-    }
-}
-/* FIX: Desktop banner unwanted gap remove */
-@media (min-width: 992px) {
-
-    .banner_container {
-        margin: 0 !important;
-        padding: 0 !important;
+        margin-bottom: 60px;
     }
 
-    .section-intro {
-        margin: 0 !important;
-        padding: 0 !important;
+    /* Desktop category gap */
+    @media (min-width: 992px) {
+        .categories-scroll {
+            display: flex;
+            justify-content: center;   /* center alignment */
+            gap: 35px;                 /* desktop gap */
+        }
     }
 
-}
+    /* FIX: Mobile banner unwanted gap remove */
+    @media (max-width: 576px) {
+        .banner_container {
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+        .banner_image {
+            display: block;
+            width: 100%;
+            height: auto;
+        }
+        .section-intro {
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+    }
 
+    /* FIX: Desktop banner unwanted gap remove */
+    @media (min-width: 992px) {
+        .banner_container {
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+        .section-intro {
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+    }
 
+    /* =========================================================
+       STRICTLY MOBILE: INFINITE SCROLL ANIMATION 
+       ========================================================= */
+    @media (max-width: 768px) {
+        .section-categories-mobile {
+            overflow: hidden; /* Hide the scrollbar */
+            width: 100%;
+            position: relative;
+            padding: 15px 0; 
+        }
 
+        /* The container holding all tracks */
+        .categories-scroll {
+            display: flex;
+            flex-wrap: nowrap;
+            width: max-content;
+            
+            /* GPU Acceleration */
+            transform: translateZ(0);
+            backface-visibility: hidden;
+            will-change: transform;
+            
+            /* The animation. Adjust time (e.g., 25s) to change speed */
+            animation: premiumMarquee 25s linear infinite;
+        }
+
+        /* The individual tracks created dynamically by JS */
+        .scroll-track {
+            display: flex;
+            flex-wrap: nowrap;
+            gap: 20px; /* Gap between categories */
+            padding-right: 20px; /* Must equal gap so tracks connect seamlessly */
+        }
+
+        /* Prevent items from shrinking */
+        .category-card {
+            flex: 0 0 auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+        }
+
+        /* The exact mathematical reset based on dynamic JS calculation */
+        @keyframes premiumMarquee {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(calc(-1 * var(--track-width, 50%))); }
+        }
+    }
 
 </style>
+
 <section class="section-categories-mobile">
-<div class="container">
-	<div class="categories-scroll">
-		{% for category in links %}
-		<a href="{{ category.get_url }}" class="category-card">
-			<div class="category-img">
-				<img src="{{ category.cat_image.url }}" alt="{{ category.category_name }}">
-			</div>
-			<div class="category-name">{{ category.category_name }}</div>
-		</a>
-		{% endfor %}
-	</div>
-</div> <!-- container //  -->
-</section>
+    <div class="container">
+        <div class="categories-scroll">
+            {% for category in links %}
+            <a href="{{ category.get_url }}" class="category-card">
+                <div class="category-img">
+                    <img src="{{ category.cat_image.url }}" alt="{{ category.category_name }}">
+                </div>
+                <div class="category-name">{{ category.category_name }}</div>
+            </a>
+            {% endfor %}
+        </div>
+    </div> </section>
 
 <section class="section-intro">
     <div class="banner_container">
-            <img class="banner_image" src="{% static 'images/banners/banner.jpg' %}" alt="Main Banner">
+        <img class="banner_image" src="{% static 'images/banners/banner.jpg' %}" alt="Main Banner">
     </div>
     <div class="category_heading">MEDAL WORTHY BRANDS TO BAG</div>
     <div class="category_items">
@@ -99,23 +142,22 @@
         <div class="slide-dots" id="slideDots"></div>
     </div>
     
-        <div class="category_heading">SHOP BY CATEGORY</div>
-        <div class="category_items">
-            <a href="#"><img class="sale_item" src="{% static 'images/offf/1.jpg' %}"></a>
-            <a href="#"><img class="sale_item" src="{% static 'images/offf/2.jpg' %}"></a>
-            <a href="#"><img class="sale_item" src="{% static 'images/offf/3.jpg' %}"></a>
-            <a href="#"><img class="sale_item" src="{% static 'images/offf/4.jpg' %}"></a>
-            <a href="#"><img class="sale_item" src="{% static 'images/offf/5.jpg' %}"></a>
-            <a href="#"><img class="sale_item" src="{% static 'images/offf/6.jpg' %}"></a>
-            <a href="#"><img class="sale_item" src="{% static 'images/offf/7.jpg' %}"></a>
-            <a href="#"><img class="sale_item" src="{% static 'images/offf/8.jpg' %}"></a>
-            <a href="#"><img class="sale_item" src="{% static 'images/offf/9.jpg' %}"></a>
-            <a href="#"><img class="sale_item" src="{% static 'images/offf/10.jpg' %}"></a>
-        </div>
+    <div class="category_heading">SHOP BY CATEGORY</div>
+    <div class="category_items">
+        <a href="#"><img class="sale_item" src="{% static 'images/offf/1.jpg' %}"></a>
+        <a href="#"><img class="sale_item" src="{% static 'images/offf/2.jpg' %}"></a>
+        <a href="#"><img class="sale_item" src="{% static 'images/offf/3.jpg' %}"></a>
+        <a href="#"><img class="sale_item" src="{% static 'images/offf/4.jpg' %}"></a>
+        <a href="#"><img class="sale_item" src="{% static 'images/offf/5.jpg' %}"></a>
+        <a href="#"><img class="sale_item" src="{% static 'images/offf/6.jpg' %}"></a>
+        <a href="#"><img class="sale_item" src="{% static 'images/offf/7.jpg' %}"></a>
+        <a href="#"><img class="sale_item" src="{% static 'images/offf/8.jpg' %}"></a>
+        <a href="#"><img class="sale_item" src="{% static 'images/offf/9.jpg' %}"></a>
+        <a href="#"><img class="sale_item" src="{% static 'images/offf/10.jpg' %}"></a>
+    </div>
 
 </section>
 
-<!-- ================= MOVING PRODUCTS STRIP ================= -->
 {% comment %} <section class="moving-products">
     <div class="moving-track">
         {% for product in products %}
@@ -135,30 +177,108 @@
 
 {% comment %} 
 <section class="section-name padding-y-sm">
-	<div class="container">
-		
-		<header class="section-heading">
-			<a href="{% url 'store' %}" class="btn btn-outline-primary float-right">See all</a>
-	<h3 class="section-title">Popular products</h3>
-</header><!-- sect-heading -->
+    <div class="container">
+        
+        <header class="section-heading">
+            <a href="{% url 'store' %}" class="btn btn-outline-primary float-right">See all</a>
+    <h3 class="section-title">Popular products</h3>
+</header><div class="row">
+    {% for product in products %}
+    <div class="col-md-3">
+        <div class="card card-product-grid">
+            <a href="{{ product.get_url }}" class="img-wrap"> <img src="{{ product.image.url }}" alt="{{ product.product_name }}"> </a>
+            <figcaption class="info-wrap">
+                <a href="{{ product.get_url }}" class="title">{{ product.product_name }}</a>
+                <div class="price mt-1">${{ product.price }}</div> <p>{{ product.stock_status }}</p>
+            </figcaption>
+        </div>
+    </div> {% endfor %}
+</div> </div></section> {% endcomment %}
 
 
-<div class="row">
-	{% for product in products %}
-	<div class="col-md-3">
-		<div class="card card-product-grid">
-			<a href="{{ product.get_url }}" class="img-wrap"> <img src="{{ product.image.url }}" alt="{{ product.product_name }}"> </a>
-			<figcaption class="info-wrap">
-				<a href="{{ product.get_url }}" class="title">{{ product.product_name }}</a>
-				<div class="price mt-1">${{ product.price }}</div> <!-- price-wrap.// -->
-				<p>{{ product.stock_status }}</p>
-			</figcaption>
-		</div>
-	</div> <!-- col.// -->
-	{% endfor %}
-</div> <!-- row.// -->
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const scrollContainer = document.querySelector('.categories-scroll');
+        if (!scrollContainer) return;
 
-</div><!-- container // -->
-</section> {% endcomment %}
+        // 1. Store the exact, pristine original HTML from Django
+        const originalHTML = scrollContainer.innerHTML;
+        
+        // 2. State tracking
+        let isAnimated = false;
+        let resizeObserver = null;
+
+        // Function to apply Mobile Animation Layout
+        function applyMobileLayout() {
+            if (isAnimated) return; // Prevent double-execution
+            
+            scrollContainer.innerHTML = ''; // Clear container
+
+            // Create the primary track
+            const primaryTrack = document.createElement('div');
+            primaryTrack.className = 'scroll-track';
+            primaryTrack.innerHTML = originalHTML;
+
+            // Clone for infinite loop
+            const clonedTrack = primaryTrack.cloneNode(true);
+            clonedTrack.setAttribute('aria-hidden', 'true'); // Hide from screen readers
+
+            scrollContainer.appendChild(primaryTrack);
+            scrollContainer.appendChild(clonedTrack);
+
+            // Calculate width dynamically
+            resizeObserver = new ResizeObserver(entries => {
+                for (let entry of entries) {
+                    const trackWidth = entry.target.getBoundingClientRect().width;
+                    scrollContainer.style.setProperty('--track-width', `${trackWidth}px`);
+                }
+            });
+            resizeObserver.observe(primaryTrack);
+
+            isAnimated = true;
+        }
+
+        // Function to restore pristine Desktop Layout
+        function revertDesktopLayout() {
+            if (!isAnimated) return; // Already desktop layout
+
+            // Cleanup observer to prevent memory leaks
+            if (resizeObserver) {
+                resizeObserver.disconnect();
+                resizeObserver = null;
+            }
+
+            // Restore pure original HTML
+            scrollContainer.innerHTML = originalHTML;
+            scrollContainer.style.removeProperty('--track-width');
+            
+            isAnimated = false;
+        }
+
+        // Function to check screen width
+        function checkLayout() {
+            if (window.innerWidth <= 768) {
+                applyMobileLayout();
+            } else {
+                revertDesktopLayout();
+            }
+        }
+
+        // Setup touch pause (Safe to bind to parent container permanently)
+        scrollContainer.addEventListener('touchstart', () => {
+            if (isAnimated) scrollContainer.style.animationPlayState = 'paused';
+        }, { passive: true });
+
+        scrollContainer.addEventListener('touchend', () => {
+            if (isAnimated) scrollContainer.style.animationPlayState = 'running';
+        }, { passive: true });
+
+        // Run on initial load
+        checkLayout();
+
+        // Run dynamically if user resizes browser window
+        window.addEventListener('resize', checkLayout);
+    });
+</script>
 
 {% endblock content %}

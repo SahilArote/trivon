@@ -52,6 +52,13 @@ class Order(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
 
+    shiprocket_shipment_id = models.CharField(max_length=100, blank=True, null=True)
+    shiprocket_order_id = models.CharField(max_length=100, blank=True, null=True)
+    awb_code = models.CharField(max_length=100, blank=True, null=True)
+    courier_name = models.CharField(max_length=100, null=True, blank=True)
+    shipment_status = models.CharField(max_length=100, null=True, blank=True)
+
+
     def full_name(self):
         return f'{self.first_name} {self.last_name}'
 

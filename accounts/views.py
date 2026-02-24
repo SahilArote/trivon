@@ -4,7 +4,7 @@ from .models import Account, UserProfile
 from orders.models import Order, OrderProduct
 from django.contrib import messages ,auth
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from carts.models import Cart , CartItem
 from carts.views import _cart_id
 import requests
@@ -360,3 +360,17 @@ def resetPassword(request):
             return redirect('resetPassword')
     else:
         return render(request, 'accounts/resetPassword.html')
+
+
+def track_order(request, order_number):
+    order = get_object_or_404(Order, order_number=order_number)
+    return render(request, 'accounts/track_order.html', {'order': order})
+
+def order_status_api(request, order_number):
+    order = get_object_or_404(Order, order_number=order_number)
+    return JsonResponse({
+        'shipment_status': order.shipment_status,
+        'awb_code': order.awb_code,
+        'courier_name': order.courier_name or "Not Assigned",
+    })
+

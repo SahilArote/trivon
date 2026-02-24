@@ -2,127 +2,803 @@
 {% load static %}
 
 {% block content %}
+<style>
+    /* ==========================================================================
+       CSS VARIABLES & GLOBAL SETTINGS
+       ========================================================================== */
+    :root {
+        --primary-pink: #ff3f6c;
+        --primary-pink-hover: #e5325b;
+        --dark-text: #282c3f;
+        --gray-text: #94969f;
+        --light-gray: #f5f5f6;
+        --border-color: #eaeaec;
+        --success-green: #03a685;
+        --bg-color: #ffffff;
+        --font-main: 'Assistant', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
 
-<section class="section-content padding-y bg">
-<div class="container">
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
 
-<!-- ============================ COMPONENT 1 ================================= -->
-{% if not cart_items %}
- <div class="container my-5">
-    <div class="alert alert-warning text-center shadow-sm rounded" role="alert">
-      <i class="bi bi-cart-x fs-3 d-block mb-2"></i>
-      <strong>Your cart is empty</strong>
-      <p class="mb-0">Browse products and add items to your cart.</p>
-      <a href="{% url 'store' %}" class="btn btn-primary mt-3">
-        <i class="bi bi-bag-plus"></i> Start Shopping
-      </a>
+    body {
+        font-family: var(--font-main);
+        background-color: var(--light-gray);
+        color: var(--dark-text);
+        -webkit-font-smoothing: antialiased;
+    }
+
+    a {
+        text-decoration: none;
+        color: inherit;
+    }
+
+    ul {
+        list-style: none;
+    }
+
+    /* ==========================================================================
+       PAGE ANIMATIONS
+       ========================================================================== */
+    .fade-in-section {
+        opacity: 0;
+        transform: translateY(15px);
+        transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+    }
+    .fade-in-section.is-visible {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    /* ==========================================================================
+       LAYOUT CONTAINERS
+       ========================================================================== */
+    .myntra-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px 15px 100px 15px; /* Bottom padding for mobile sticky bar */
+    }
+
+    /* ==========================================================================
+       EMPTY CART STATE
+       ========================================================================== */
+    .empty-cart-wrapper {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: var(--bg-color);
+        border-radius: 8px;
+        padding: 60px 20px;
+        text-align: center;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        margin-top: 20px;
+    }
+
+    .empty-cart-icon {
+        font-size: 60px;
+        color: var(--border-color);
+        margin-bottom: 20px;
+    }
+
+    .empty-cart-title {
+        font-size: 20px;
+        font-weight: 700;
+        margin-bottom: 10px;
+    }
+
+    .empty-cart-text {
+        color: var(--gray-text);
+        margin-bottom: 30px;
+        font-size: 15px;
+    }
+
+    .btn-primary-pink {
+        background-color: var(--primary-pink);
+        color: white;
+        padding: 14px 40px;
+        border-radius: 4px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        transition: background-color 0.3s ease, transform 0.2s ease;
+        border: none;
+        cursor: pointer;
+        display: inline-block;
+        width: 100%;
+        text-align: center;
+    }
+
+    .btn-primary-pink:hover {
+        background-color: var(--primary-pink-hover);
+    }
+    
+    .btn-primary-pink:active {
+        transform: scale(0.98);
+    }
+
+    /* ==========================================================================
+       CART LAYOUT (MOBILE FIRST)
+       ========================================================================== */
+    .cart-layout {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .cart-items-section {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .cart-header {
+        font-size: 18px;
+        font-weight: 700;
+        margin-bottom: 5px;
+        color: var(--dark-text);
+    }
+
+    /* --- CART ITEM CARD --- */
+    .cart-card {
+        background: var(--bg-color);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        padding: 15px;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        transition: box-shadow 0.3s ease, transform 0.3s ease;
+    }
+
+    .cart-card:hover {
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+
+    .cart-card-top {
+        display: flex;
+        gap: 15px;
+    }
+
+    .cart-card-image {
+        width: 90px;
+        height: 120px;
+        border-radius: 4px;
+        object-fit: cover;
+        background-color: var(--light-gray);
+    }
+
+    .cart-card-details {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+    }
+
+    .product-brand {
+        font-weight: 700;
+        font-size: 14px;
+        margin-bottom: 4px;
+        color: var(--dark-text);
+    }
+
+    .product-title {
+        font-size: 14px;
+        color: var(--gray-text);
+        margin-bottom: 8px;
+        line-height: 1.4;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .product-variations {
+        font-size: 12px;
+        color: var(--gray-text);
+        background: var(--light-gray);
+        padding: 4px 8px;
+        border-radius: 2px;
+        display: inline-block;
+        margin-bottom: 10px;
+        align-self: flex-start;
+    }
+
+    .product-price {
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--dark-text);
+    }
+
+    .product-price-each {
+        font-size: 12px;
+        color: var(--gray-text);
+        font-weight: 400;
+        margin-left: 5px;
+    }
+
+    /* --- CART CARD ACTIONS --- */
+    .cart-card-bottom {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-top: 1px solid var(--border-color);
+        padding-top: 12px;
+    }
+
+    .quantity-selector {
+        display: flex;
+        align-items: center;
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        overflow: hidden;
+    }
+
+    .qty-btn {
+        background: #fff;
+        border: none;
+        color: var(--primary-pink);
+        width: 32px;
+        height: 32px;
+        font-size: 18px;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.2s ease;
+    }
+
+    .qty-btn:hover {
+        background: var(--light-gray);
+    }
+
+    .qty-btn:active {
+        background: #e0e0e0;
+    }
+
+    .qty-input {
+        width: 40px;
+        height: 32px;
+        border: none;
+        border-left: 1px solid var(--border-color);
+        border-right: 1px solid var(--border-color);
+        text-align: center;
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--dark-text);
+        pointer-events: none;
+    }
+
+    .remove-btn {
+        color: var(--dark-text);
+        font-size: 13px;
+        font-weight: 700;
+        text-transform: uppercase;
+        background: none;
+        border: none;
+        cursor: pointer;
+        transition: color 0.2s ease;
+    }
+
+    .remove-btn:hover {
+        color: var(--primary-pink);
+    }
+
+    /* ==========================================================================
+       ORDER SUMMARY SECTION
+       ========================================================================== */
+    .cart-summary-section {
+        background: var(--bg-color);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .summary-title {
+        font-size: 14px;
+        font-weight: 700;
+        text-transform: uppercase;
+        color: var(--gray-text);
+        border-bottom: 1px solid var(--border-color);
+        padding-bottom: 10px;
+        margin-bottom: 10px;
+    }
+
+    .summary-row {
+        display: flex;
+        justify-content: space-between;
+        font-size: 14px;
+        color: var(--dark-text);
+        margin-bottom: 12px;
+    }
+
+    .summary-row.total-row {
+        font-size: 16px;
+        font-weight: 700;
+        border-top: 1px solid var(--border-color);
+        padding-top: 15px;
+        margin-bottom: 0;
+    }
+
+    .coupon-box {
+        display: flex;
+        gap: 10px;
+    }
+
+    .coupon-input {
+        flex: 1;
+        padding: 10px 12px;
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        font-size: 13px;
+        outline: none;
+        transition: border-color 0.3s;
+    }
+
+    .coupon-input:focus {
+        border-color: var(--primary-pink);
+    }
+
+    .btn-apply {
+        background: transparent;
+        border: 1px solid var(--primary-pink);
+        color: var(--primary-pink);
+        padding: 0 15px;
+        border-radius: 4px;
+        font-weight: 700;
+        font-size: 13px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .btn-apply:hover {
+        background: var(--primary-pink);
+        color: white;
+    }
+
+    .btn-continue {
+        background: transparent;
+        border: 1px solid var(--border-color);
+        color: var(--dark-text);
+        padding: 14px;
+        text-align: center;
+        border-radius: 4px;
+        font-weight: 600;
+        font-size: 14px;
+        display: block;
+        margin-top: 10px;
+        transition: background 0.3s ease;
+    }
+
+    .btn-continue:hover {
+        background: var(--light-gray);
+    }
+
+    .trust-badges {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-top: 15px;
+        padding-top: 15px;
+        border-top: 1px dashed var(--border-color);
+    }
+
+    .badge-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 12px;
+        color: var(--gray-text);
+    }
+
+    .badge-item svg {
+        width: 18px;
+        height: 18px;
+        fill: var(--primary-pink);
+    }
+
+    /* ==========================================================================
+       MOBILE STICKY CHECKOUT BAR
+       ========================================================================== */
+    .mobile-sticky-checkout {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: #fff;
+        padding: 15px;
+        box-shadow: 0 -4px 12px rgba(0,0,0,0.08);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        z-index: 100;
+    }
+
+    .mobile-total-wrap {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .mobile-total-label {
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--gray-text);
+        text-transform: uppercase;
+    }
+
+    .mobile-total-price {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--dark-text);
+    }
+
+    .mobile-sticky-checkout .btn-primary-pink {
+        width: auto;
+        padding: 12px 30px;
+        font-size: 14px;
+    }
+
+    .desktop-checkout-btn {
+        display: none;
+    }
+
+    /* ==========================================================================
+       CUSTOM CONFIRMATION MODAL
+       ========================================================================== */
+    .custom-modal-overlay {
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(0,0,0,0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+
+    .custom-modal-overlay.active {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .custom-modal {
+        background: #fff;
+        border-radius: 8px;
+        padding: 25px;
+        width: 90%;
+        max-width: 360px;
+        text-align: center;
+        transform: scale(0.9);
+        transition: transform 0.3s ease;
+    }
+
+    .custom-modal-overlay.active .custom-modal {
+        transform: scale(1);
+    }
+
+    .modal-title {
+        font-size: 18px;
+        font-weight: 700;
+        margin-bottom: 10px;
+        color: var(--dark-text);
+    }
+
+    .modal-text {
+        font-size: 14px;
+        color: var(--gray-text);
+        margin-bottom: 25px;
+    }
+
+    .modal-actions {
+        display: flex;
+        gap: 15px;
+    }
+
+    .modal-btn {
+        flex: 1;
+        padding: 12px;
+        border-radius: 4px;
+        font-weight: 700;
+        font-size: 14px;
+        cursor: pointer;
+        text-align: center;
+        border: none;
+    }
+
+    .modal-btn-cancel {
+        background: var(--light-gray);
+        color: var(--dark-text);
+        border: 1px solid var(--border-color);
+    }
+
+    .modal-btn-confirm {
+        background: var(--primary-pink);
+        color: #fff;
+    }
+
+    /* ==========================================================================
+       DESKTOP MEDIA QUERIES
+       ========================================================================== */
+    @media (min-width: 768px) {
+        .myntra-container {
+            padding-bottom: 40px;
+        }
+
+        .cart-layout {
+            flex-direction: row;
+            align-items: flex-start;
+        }
+
+        .cart-items-section {
+            flex: 0 0 65%;
+            background: #fff;
+            padding: 25px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        .cart-card {
+            flex-direction: row;
+            border: none;
+            border-bottom: 1px solid var(--border-color);
+            border-radius: 0;
+            padding: 20px 0;
+            gap: 20px;
+        }
+
+        .cart-card:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+        
+        .cart-card:hover {
+            box-shadow: none;
+        }
+
+        .cart-card-top {
+            flex: 1;
+        }
+
+        .cart-card-actions {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            justify-content: space-between;
+            min-width: 150px;
+        }
+
+        .cart-card-bottom {
+            border-top: none;
+            padding-top: 0;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 15px;
+        }
+
+        .cart-summary-section {
+            flex: 0 0 32%;
+            position: sticky;
+            top: 20px;
+        }
+
+        .mobile-sticky-checkout {
+            display: none;
+        }
+
+        .desktop-checkout-btn {
+            display: block;
+        }
+        
+        .empty-cart-wrapper {
+            padding: 100px 20px;
+        }
+    }
+</style>
+
+<section class="myntra-container fade-in-section">
+    {% if not cart_items %}
+    <div class="empty-cart-wrapper">
+        <div class="empty-cart-icon">
+            <svg width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="9" cy="21" r="1"></circle>
+                <circle cx="20" cy="21" r="1"></circle>
+                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                <line x1="1" y1="1" x2="23" y2="23"></line>
+            </svg>
+        </div>
+        <h2 class="empty-cart-title">Hey, it feels so light!</h2>
+        <p class="empty-cart-text">There is nothing in your bag. Let's add some items.</p>
+        <a href="{% url 'store' %}" class="btn-primary-pink" style="max-width: 250px;">Add Items from Wishlist</a>
     </div>
-  </div>
 
+    {% else %}
+    <div class="cart-layout">
+        
+        <div class="cart-items-section">
+            <div class="cart-header">My Bag <span style="font-weight: 400; color: var(--gray-text); font-size: 14px;">({{ cart_items|length }} items)</span></div>
+            
+            {% for cart_item in cart_items %}
+            <div class="cart-card">
+                <div class="cart-card-top">
+                    <a href="{{ cart_item.product.get_url }}">
+                        <img src="{{ cart_item.product.image.url }}" alt="{{ cart_item.product.product_name }}" class="cart-card-image">
+                    </a>
+                    
+                    <div class="cart-card-details">
+                        <a href="{{ cart_item.product.get_url }}">
+                            <div class="product-brand">{{ cart_item.product.product_name }}</div>
+                            <div class="product-title text-muted">Premium Quality Product</div>
+                        </a>
+                        
+                        {% if cart_item.variation.all %}
+                        <div class="product-variations">
+                            {% for item in cart_item.variation.all %}
+                                {{ item.variation_category|title }}: {{ item.variation_value|title }}{% if not forloop.last %} | {% endif %}
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        
+                        <div class="product-price">
+                            ${{ cart_item.sub_total }}
+                            <span class="product-price-each">(${{ cart_item.product.price }} each)</span>
+                        </div>
+                        
+                        <div style="font-size: 12px; color: var(--success-green); margin-top: 8px; font-weight: 600;">
+                            ✓ In Stock
+                        </div>
+                    </div>
+                </div>
 
+                <div class="cart-card-bottom">
+                    <div class="quantity-selector">
+                        <a href="{% url 'remove_cart' cart_item.product.id cart_item.id %}" class="qty-btn" aria-label="Decrease quantity">−</a>
+                        
+                        <input type="text" class="qty-input" value="{{ cart_item.quantity }}" readonly>
+                        
+                        <form action="{% url 'add_cart' cart_item.product.id %}" method="POST" style="margin: 0; display: flex;">
+                            {% csrf_token %}
+                            {% for item in cart_item.variation.all %}
+                                <input type="hidden" name="{{ item.variation_category | lower }}" value="{{ item.variation_value | capfirst }}">
+                            {% endfor %}
+                            <button type="submit" class="qty-btn" aria-label="Increase quantity">+</button>
+                        </form>
+                    </div>
 
-{% else %}
-<div class="row">
-	<aside class="col-lg-9">
-<div class="card">
-<table class="table table-borderless table-shopping-cart">
-<thead class="text-muted">
-<tr class="small text-uppercase">
-  <th scope="col">Product</th>
-  <th scope="col" width="120">Quantity</th>
-  <th scope="col" width="120">Price</th>
-  <th scope="col" class="text-right" width="200"> </th>
-</tr>
-</thead>
-<tbody>
-	{% for cart_item in cart_items %}
-<tr>
-	<td>
-		<figure class="itemside align-items-center">
-			<div class="aside"><img src="{{ cart_item.product.image.url }}" class="img-sm"></div>
-			<figcaption class="info">
-				<a href="{{ cart_item.product.get_url }}" class="title text-dark">{{ cart_item.product.product_name }}</a>
-				<p class="text-muted small">
-					{% if cart_item.variation.all %}
-						{% for item in cart_item.variation.all %}
-							{{ item.variation_category }}: {{ item.variation_value }}<br>
-						{% endfor %}
-					{% endif %}
-				</p>
-			</figcaption>
-		</figure>
-	</td>
-	<td> 
-		<!-- col.// -->
-					<div class="col"> 
-						<div class="input-group input-spinner">
-							<div class="input-group-prepend">
-							<a href={% url 'remove_cart' cart_item.product.id cart_item.id %} class="btn btn-light" type="button" id="button-plus"> <i class="fa fa-minus"></i> </a>
-							</div>
-							<input type="text" class="form-control"  value={{ cart_item.quantity }}>
-							<div class="input-group-append">
-								<form action="{% url 'add_cart' cart_item.product.id %}" method="POST">
-									{% csrf_token %}
-									{% for item in cart_item.variation.all %}
-									<input type="hidden" name="{{ item.variation_category | lower }}" value="{{ item.variation_value | capfirst }}">
-									{% endfor %}
-									<button class="btn btn-light" type="submit" id="button-minus"> <i class="fa fa-plus"></i> </button>
-								</form>
-						</div>
-						</div> <!-- input-group.// -->
-					</div> <!-- col.// -->
-	</td>
-	<td> 
-		<div class="price-wrap"> 
-			<var class="price">${{ cart_item.sub_total }} </var> 
-			<small class="text-muted"> ${{ cart_item.product.price }} each </small> 
-		</div> <!-- price-wrap .// -->
-	</td>
-	<td class="text-right"> 
-	<a href={% url 'remove_cart_item' cart_item.product.id cart_item.id %} onclick="return confirm('Are you sure you want to remove this item from your cart?')" class="btn btn-danger"> Remove</a>
-	</td>
-</tr>
-	{% endfor %}
+                    <a href="{% url 'remove_cart_item' cart_item.product.id cart_item.id %}" class="remove-btn js-remove-btn">
+                        Remove
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
 
-</tbody>
-</table>
-</div> <!-- card.// -->
+        <div class="cart-summary-section">
+            <div>
+                <div class="summary-title">Coupons</div>
+                <div class="coupon-box">
+                    <input type="text" class="coupon-input" placeholder="Apply Coupons">
+                    <button class="btn-apply">APPLY</button>
+                </div>
+            </div>
 
-	</aside> <!-- col.// -->
-	<aside class="col-lg-3">
+            <div>
+                <div class="summary-title">Price Details ({{ cart_items|length }} Items)</div>
+                
+                <div class="summary-row">
+                    <span>Total MRP</span>
+                    <span>${{ totel }}</span>
+                </div>
+                
+                <div class="summary-row">
+                    <span>Tax</span>
+                    <span>${{ tax }}</span>
+                </div>
+                
+                <div class="summary-row" style="color: var(--success-green);">
+                    <span>Delivery Charges</span>
+                    <span>FREE</span>
+                </div>
 
-		<div class="card">
-		<div class="card-body">
-			<dl class="dlist-align">
-			  <dt>Total price:</dt>
-			  <dd class="text-right">${{ totel }}</dd>
-			</dl>
-			<dl class="dlist-align">
-			  <dt>Tax:</dt>
-			  <dd class="text-right"> ${{ tax }}</dd>
-			</dl>
-			<dl class="dlist-align">
-			  <dt>Total:</dt>
-			  <dd class="text-right text-dark b"><strong>${{ grand_totel }}</strong></dd>
-			</dl>
-			<hr>
-			<p class="text-center mb-3">
-				<img src={% static "images/misc/payments.png" %} height="26">
-			</p>
-			<a href="{% url 'checkout'%}" class="btn btn-primary btn-block"> Checkout </a>
-			<a href="{% url 'store' %}" class="btn btn-light btn-block">Continue Shopping</a>
-		</div> <!-- card-body.// -->
-		</div> <!-- card.// -->
+                <div class="summary-row total-row">
+                    <span>Total Amount</span>
+                    <span>${{ grand_totel }}</span>
+                </div>
+            </div>
 
-</aside> <!-- col.// -->
+            <a href="{% url 'checkout' %}" class="btn-primary-pink desktop-checkout-btn">Proceed to Checkout</a>
+            <a href="{% url 'store' %}" class="btn-continue">Continue Shopping</a>
 
+            <div class="trust-badges">
+                <div class="badge-item">
+                    <svg viewBox="0 0 24 24"><path d="M12 2L3 7v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-9-5zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V8.53l7-3.89v8.35z"/></svg>
+                    <span>100% Secure Payments</span>
+                </div>
+                <div class="badge-item">
+                    <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                    <span>Easy 14 days returns & exchanges</span>
+                </div>
+            </div>
+            
+            <div style="text-align: center; margin-top: 10px;">
+                <img src="{% static 'images/misc/payments.png' %}" alt="Payments Accepted" height="26" style="opacity: 0.6;">
+            </div>
+        </div>
 
-</div> <!-- row.// -->
-{% endif %}
-<!-- ============================ COMPONENT 1 END .// ================================= -->
+    </div>
 
-</div> <!-- container .//  -->
+    <div class="mobile-sticky-checkout">
+        <div class="mobile-total-wrap">
+            <span class="mobile-total-label">Total Amount</span>
+            <span class="mobile-total-price">${{ grand_totel }}</span>
+        </div>
+        <a href="{% url 'checkout' %}" class="btn-primary-pink">Checkout</a>
+    </div>
+
+    {% endif %}
 </section>
-<!-- ========================= SECTION CONTENT END// ========================= -->
+
+<div class="custom-modal-overlay" id="removeModal">
+    <div class="custom-modal">
+        <div class="modal-title">Remove Item</div>
+        <div class="modal-text">Are you sure you want to remove this item from your bag?</div>
+        <div class="modal-actions">
+            <button class="modal-btn modal-btn-cancel" id="cancelRemove">Cancel</button>
+            <a href="#" class="modal-btn modal-btn-confirm" id="confirmRemove">Remove</a>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // --- 1. Fade-in Animation ---
+        setTimeout(() => {
+            const section = document.querySelector('.fade-in-section');
+            if(section) section.classList.add('is-visible');
+        }, 100);
+
+        // --- 2. Custom Remove Modal Logic ---
+        const removeButtons = document.querySelectorAll('.js-remove-btn');
+        const modalOverlay = document.getElementById('removeModal');
+        const cancelBtn = document.getElementById('cancelRemove');
+        const confirmBtn = document.getElementById('confirmRemove');
+
+        if(removeButtons.length > 0) {
+            removeButtons.forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    // Grab the link from the clicked remove button
+                    const removeUrl = this.getAttribute('href');
+                    
+                    // Assign it to the modal confirm button
+                    confirmBtn.setAttribute('href', removeUrl);
+                    
+                    // Show modal
+                    modalOverlay.classList.add('active');
+                });
+            });
+
+            // Close modal events
+            cancelBtn.addEventListener('click', closeRemoveModal);
+            modalOverlay.addEventListener('click', function(e) {
+                if(e.target === modalOverlay) closeRemoveModal();
+            });
+        }
+
+        function closeRemoveModal() {
+            modalOverlay.classList.remove('active');
+            // Clear URL for safety
+            setTimeout(() => confirmBtn.setAttribute('href', '#'), 300);
+        }
+    });
+</script>
 
 {% endblock %}

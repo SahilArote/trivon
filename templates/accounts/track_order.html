@@ -1,0 +1,252 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    /* Modern SaaS Tracking CSS */
+    .tracking-card {
+        border: none;
+        border-radius: 16px;
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
+    }
+    
+    .tracking-info-label {
+        font-size: 0.85rem;
+        color: #6c757d;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+    }
+    
+    .tracking-info-value {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #212529;
+    }
+
+    /* Timeline Container */
+    .track-timeline {
+        position: relative;
+        display: flex;
+        justify-content: space-between;
+        margin-top: 3.5rem;
+        margin-bottom: 2rem;
+    }
+
+    /* Background Line */
+    .track-timeline::before {
+        content: '';
+        position: absolute;
+        top: 14px;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background: #e9ecef;
+        z-index: 1;
+        border-radius: 4px;
+    }
+
+    /* Animated Progress Line */
+    .track-progress {
+        position: absolute;
+        top: 14px;
+        left: 0;
+        height: 4px;
+        background: #4f46e5; /* Indigo */
+        z-index: 2;
+        transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.5s ease;
+        border-radius: 4px;
+        width: 0%; /* Default, overridden by JS */
+    }
+
+    /* Individual Steps */
+    .track-step {
+        position: relative;
+        z-index: 3;
+        text-align: center;
+        width: 25%;
+    }
+
+    /* Step Circles */
+    .track-icon {
+        width: 32px;
+        height: 32px;
+        background: #fff;
+        border: 4px solid #e9ecef;
+        border-radius: 50%;
+        margin: 0 auto 0.75rem auto;
+        transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .track-label {
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: #adb5bd;
+        transition: color 0.4s ease;
+    }
+
+    /* Active State styling */
+    .track-step.active .track-icon {
+        border-color: #4f46e5;
+        background: #4f46e5;
+        box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.15);
+    }
+    .track-step.active .track-label {
+        color: #212529;
+        font-weight: 600;
+    }
+
+    /* Delivered State Styling (Green) */
+    .track-progress.delivered {
+        background: #10b981; /* Emerald Green */
+    }
+    .track-step.delivered .track-icon {
+        border-color: #10b981;
+        background: #10b981;
+        box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.15);
+    }
+    
+    .status-badge {
+        padding: 0.5em 1em;
+        border-radius: 50rem;
+        font-weight: 600;
+    }
+</style>
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-9">
+            
+            <div class="card tracking-card p-4 p-md-5">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h4 class="mb-0 fw-bold">Shipment Tracking</h4>
+                    <span id="status-badge" class="badge status-badge bg-primary text-white">Loading...</span>
+                </div>
+
+                <div class="row g-4 mb-5 p-4 bg-light rounded-4">
+                    <div class="col-6 col-md-3">
+                        <div class="tracking-info-label">Order Number</div>
+                        <div class="tracking-info-value">#{{ order.order_number }}</div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="tracking-info-label">AWB Code</div>
+                        <div class="tracking-info-value" id="awb-code">{{ order.awb_code|default:"Pending" }}</div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="tracking-info-label">Courier</div>
+                        <div class="tracking-info-value" id="courier-name">{{ order.courier_name|default:"Not Assigned" }}</div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="tracking-info-label">Estimated Delivery</div>
+                        <div class="tracking-info-value text-muted">TBD</div>
+                    </div>
+                </div>
+
+                <div class="track-timeline">
+                    <div id="timeline-progress" class="track-progress"></div>
+                    
+                    <div class="track-step" id="step-0">
+                        <div class="track-icon"></div>
+                        <div class="track-label">Order Placed</div>
+                    </div>
+                    <div class="track-step" id="step-1">
+                        <div class="track-icon"></div>
+                        <div class="track-label">Shipped</div>
+                    </div>
+                    <div class="track-step" id="step-2">
+                        <div class="track-icon"></div>
+                        <div class="track-label">In Transit</div>
+                    </div>
+                    <div class="track-step" id="step-3">
+                        <div class="track-icon"></div>
+                        <div class="track-label">Delivered</div>
+                    </div>
+                </div>
+
+            </div>
+            
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Initialize timeline with data from Django template rendering
+        const initialStatus = "{{ order.shipment_status|escapejs }}";
+        updateTimeline(initialStatus);
+
+        // AJAX Polling every 10 seconds
+        setInterval(() => {
+            fetch(`/api/track-order/{{ order.order_number }}/status/`)
+                .then(response => response.json())
+                .then(data => {
+                    updateTimeline(data.shipment_status);
+                    
+                    // Update DOM elements dynamically
+                    document.getElementById('awb-code').innerText = data.awb_code || 'Pending';
+                    document.getElementById('courier-name').innerText = data.courier_name || 'Not Assigned';
+                })
+                .catch(error => console.error('Error fetching tracking status:', error));
+        }, 10000); 
+    });
+
+    function updateTimeline(status) {
+        let stepIndex = 0;
+        let isDelivered = false;
+        
+        // Normalize status strings (Adjust these to match your backend exactly)
+        const currentStatus = status.toLowerCase();
+
+        if (currentStatus.includes('pending') || currentStatus.includes('processing') || currentStatus.includes('sandbox')) {
+            stepIndex = 0;
+        } else if (currentStatus.includes('awb') || currentStatus.includes('shipped')) {
+            stepIndex = 1;
+        } else if (currentStatus.includes('transit')) {
+            stepIndex = 2;
+        } else if (currentStatus.includes('delivered')) {
+            stepIndex = 3;
+            isDelivered = true;
+        }
+
+        // Calculate progress bar width (0%, 33.3%, 66.6%, 100%)
+        const progressWidth = (stepIndex / 3) * 100;
+        const progressBar = document.getElementById('timeline-progress');
+        progressBar.style.width = `${progressWidth}%`;
+
+        // Update step UI and colors
+        for (let i = 0; i < 4; i++) {
+            const stepEl = document.getElementById(`step-${i}`);
+            
+            // Reset classes
+            stepEl.classList.remove('active', 'delivered');
+            
+            if (i <= stepIndex) {
+                stepEl.classList.add('active');
+                if (isDelivered) {
+                    stepEl.classList.add('delivered');
+                }
+            }
+        }
+
+        // Update Progress Bar color if delivered
+        if (isDelivered) {
+            progressBar.classList.add('delivered');
+        } else {
+            progressBar.classList.remove('delivered');
+        }
+
+        // Update the visual status badge
+        const badge = document.getElementById('status-badge');
+        badge.innerText = status;
+        
+        if (isDelivered) {
+            badge.className = 'badge status-badge bg-success text-white';
+        } else if (stepIndex > 0) {
+            badge.className = 'badge status-badge bg-primary text-white';
+        } else {
+            badge.className = 'badge status-badge bg-secondary text-white';
+        }
+    }
+</script>
+{% endblock %}

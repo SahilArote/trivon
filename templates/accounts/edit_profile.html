@@ -1,221 +1,328 @@
 {% extends 'base.html' %}
 {% block content %}
 
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
 <style>
-/* ================= PAGE BASE ================= */
-.profile-section {
-    background: #f4f6fb;
-    padding: 30px 0;
+/* ================= GLOBAL THEME ================= */
+:root {
+    --m-pink: #ff3f6c;
+    --m-dark: #282c3f;
+    --m-gray: #94969f;
+    --m-bg: #f5f5f6;
+    --m-border: #eaeaec;
+    --sidebar-width: 280px;
 }
+
+/* Base Fixes */
+html, body { background-color: var(--m-bg); font-family: 'Assistant', sans-serif; margin: 0; padding: 0; width: 100%; overflow-x: hidden; }
+
+/* ================= MOBILE NAV HEADER (FIXED) ================= */
+/* ================= MOBILE NAV HEADER (FIXED) ================= */
+.mobile-top-nav {
+    display: none; 
+    padding: 0 20px;
+    background: #fff;
+    border-bottom: 1px solid var(--m-border);
+    justify-content: space-between;
+    align-items: center;
+    
+    /* Ye isko ekdam lock kar dega */
+    position: fixed !important; 
+    top: 50px !important; /* Aapke bataye mutabiq 50px rakha hai */
+    left: 0;
+    width: 100%;
+    height: 60px;
+    z-index: 1100;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+.mobile-top-nav span { font-weight: 700; font-size: 12px; color: var(--m-dark); letter-spacing: 1px; text-transform: uppercase; }
+.menu-trigger { background: none; border: none; font-size: 14px; color: var(--m-pink); font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 8px; }
+
+/* ================= LAYOUT & CONTAINERS ================= */
+.profile-wrapper { min-height: 100vh; width: 100%; }
 
 .profile-container {
     max-width: 1200px;
-    margin: auto;
-    padding: 0 15px;
+    margin: 0 auto;
+    display: grid; /* Grid prevents overlap on desktop */
+    grid-template-columns: var(--sidebar-width) 1fr;
+    gap: 40px;
+    padding: 40px 20px;
 }
 
-.profile-layout {
+/* ================= SIDEBAR (CONSISTENT) ================= */
+.sidebar-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(40, 44, 63, 0.7);
+    z-index: 1050;
+    backdrop-filter: blur(2px);
+}
+
+.dashboard-sidebar {
+    width: var(--sidebar-width);
+    background: #fff;
+    height: fit-content;
+    position: sticky;
+    top: 20px;
+    border: 1px solid var(--m-border);
+    z-index: 10;
+}
+
+.sidebar-heading {
+    padding: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--m-gray);
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--m-border);
+}
+
+.dashboard-menu a {
     display: flex;
-    gap: 25px;
+    align-items: center;
+    padding: 14px 20px;
+    color: var(--m-dark);
+    text-decoration: none;
+    font-size: 14px;
+    transition: 0.2s;
+    border-left: 3px solid transparent;
 }
 
-/* ================= CONTENT ================= */
-.profile-content {
-    flex: 1;
+.dashboard-menu a i { margin-right: 15px; width: 18px; color: #686b78; }
+.dashboard-menu a.active { color: var(--m-pink); background: #f5f5f6; border-left-color: var(--m-pink); font-weight: 700; }
+.dashboard-menu a.active i { color: var(--m-pink); }
+
+/* ================= FORM CARD ================= */
+.edit-card {
+    background: #fff;
+    border: 1px solid var(--m-border);
+    padding: 40px;
+    border-radius: 4px;
 }
 
-/* Card */
-.profile-card {
-    background: #ffffff;
-    border-radius: 16px;
-    padding: 25px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
-}
-
-.profile-header {
+.card-title {
     font-size: 18px;
-    font-weight: 600;
-    margin-bottom: 20px;
+    font-weight: 700;
+    color: var(--m-dark);
+    margin: 0 0 30px 0;
+    padding-bottom: 15px;
+    border-bottom: 1px solid var(--m-border);
 }
 
-/* ================= PROFILE IMAGE ================= */
-.profile-image {
-    display: flex;
-    justify-content: flex-end;
-    margin-bottom: 20px;
-}
-
-.profile-image img {
-    width: 90px;
-    height: 90px;
-    border-radius: 50%;
-    object-fit: cover;
-}
-
-/* ================= FORM ================= */
-.form-grid {
-    display: grid;
-    grid-template-columns: repeat(2,1fr);
-    gap: 20px;
-}
-
-.form-group {
+/* Avatar Section */
+.avatar-upload-section {
     display: flex;
     flex-direction: column;
+    align-items: center;
+    margin-bottom: 40px;
 }
 
-.form-group label {
+.avatar-preview {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid #fff;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    margin-bottom: 15px;
+}
+
+.btn-upload-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--m-pink);
+    text-transform: uppercase;
+    cursor: pointer;
+    padding: 8px 16px;
+    border: 1px solid var(--m-pink);
+    border-radius: 2px;
+    transition: 0.2s;
+}
+
+.btn-upload-label:hover { background: var(--m-pink); color: #fff; }
+
+/* Grid Inputs */
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; }
+.form-group { display: flex; flex-direction: column; gap: 8px; }
+.form-group.full { grid-column: span 2; }
+
+.form-group label { font-size: 12px; font-weight: 700; color: var(--m-dark); text-transform: uppercase; }
+
+.form-group input {
+    padding: 12px 15px;
+    border: 1px solid var(--m-border);
+    border-radius: 4px;
     font-size: 14px;
-    margin-bottom: 6px;
-    color: #374151;
+    color: var(--m-dark);
+    transition: 0.2s;
 }
 
-/* Django form inputs */
-.form-group input,
-.form-group select,
-.form-group textarea {
-    padding: 10px 12px;
-    border-radius: 8px;
-    border: 1px solid #d1d5db;
-    font-size: 14px;
-}
+.form-group input:focus { outline: none; border-color: var(--m-dark); box-shadow: 0 0 0 1px var(--m-dark); }
 
-.form-group input:focus,
-.form-group select:focus,
-.form-group textarea:focus {
-    outline: none;
-    border-color: #111827;
-}
-
-/* Full width */
-.full {
-    grid-column: span 2;
-}
-
-/* Save button */
 .save-btn {
-    margin-top: 25px;
-    padding: 12px 20px;
-    background: #111827;
+    width: 100%;
+    background: var(--m-pink);
     color: #fff;
     border: none;
-    border-radius: 10px;
-    font-size: 15px;
+    padding: 16px;
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 14px;
+    margin-top: 40px;
     cursor: pointer;
-    transition: background 0.2s ease;
+    border-radius: 2px;
+    transition: 0.3s;
 }
 
-.save-btn:hover {
-    background: #000;
-}
+.save-btn:hover { background: #e62e5d; box-shadow: 0 4px 12px rgba(255, 63, 108, 0.3); }
 
-/* ================= MOBILE ================= */
+/* ================= MOBILE RESPONSIVE FIXES ================= */
+/* ================= MOBILE RESPONSIVE FIXES ================= */
 @media (max-width: 768px) {
-    .profile-layout {
-        flex-direction: column;
+    .mobile-top-nav { display: flex; }
+    
+    /* Push content below fixed header (50px top + 60px nav height) */
+    .profile-wrapper { padding-top: 120px !important; }
+
+    /* Hide redundant title on mobile for clean look */
+    .card-title { display: none !important; }
+
+    .profile-container { display: block; padding: 15px; }
+    
+    .dashboard-sidebar {
+        position: fixed;
+        top: 0;
+        left: -100%;
+        height: 100vh;
+        z-index: 1200;
+        transition: 0.3s ease;
+        border: none;
+        width: 280px;
     }
 
-    .form-grid {
-        grid-template-columns: 1fr;
-    }
+    .dashboard-sidebar.open { left: 0; }
+    .sidebar-overlay.show { display: block; }
 
-    .full {
-        grid-column: span 1;
-    }
-
-    .profile-image {
-        justify-content: center;
-    }
+    .edit-card { padding: 30px 20px; border: none; background: none; }
+    .form-grid { grid-template-columns: 1fr; }
 }
 </style>
 
-<section class="profile-section">
-    {% include 'includes/alerts.html' %}
+<div class="profile-wrapper">
+    <div class="mobile-top-nav">
+        <span>EDIT PROFILE</span>
+        <button class="menu-trigger" onclick="toggleSidebar()">
+            <i class="fa fa-bars"></i> MENU
+        </button>
+    </div>
+
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
 
     <div class="profile-container">
-        <div class="profile-layout">
+        <aside class="dashboard-sidebar" id="dashboardSidebar">
+            <div class="sidebar-heading">Account Setting</div>
+            <nav class="dashboard-menu">
+                <a href="{% url 'dashboard' %}" class="{% if '/dashboard/' in request.path %}active{% endif %}">
+                    <i class="fa fa-th-large"></i> Overview
+                </a>
+                <a href="{% url 'my_orders' %}" class="{% if '/my_orders/' in request.path %}active{% endif %}">
+                    <i class="fa fa-shopping-bag"></i> Orders
+                </a>
+                <a href="{% url 'edit_profile' %}" class="{% if '/edit_profile/' in request.path %}active{% endif %}">
+                    <i class="fa fa-user"></i> Profile Details
+                </a>
+                <a href="{% url 'change_password' %}" class="{% if '/change_password/' in request.path %}active{% endif %}">
+                    <i class="fa fa-lock"></i> Change Password
+                </a>
+            </nav>
+        </aside>
 
-            <!-- SIDEBAR -->
-            {% include 'includes/dashboard_sidebar.html' %}
+        <main class="edit-card">
+            <h2 class="card-title">Edit Personal Details</h2>
 
-            <!-- MAIN CONTENT -->
-            <main class="profile-content">
+            <form action="{% url 'edit_profile' %}" method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
 
-                <div class="profile-card">
-                    <div class="profile-header">
-                        Edit Your Profile
+                <div class="avatar-upload-section">
+                    {% if userprofile.profile_picture %}
+                        <img src="{{ userprofile.profile_picture.url }}" class="avatar-preview" id="profile-img-preview">
+                    {% else %}
+                        <img src="/static/images/default-user.png" class="avatar-preview" id="profile-img-preview">
+                    {% endif %}
+                    <div class="photo-input-wrapper">
+                        <label class="btn-upload-label" for="id_profile_picture">Change Photo</label>
+                        <div style="display:none;">{{ profile_form.profile_picture }}</div>
                     </div>
-
-                    <!-- Profile Image -->
-                    <div class="profile-image">
-                        {% if userprofile.profile_picture %}
-                            <img src="{{ userprofile.profile_picture.url }}" alt="Profile Picture">
-                        {% endif %}
-                    </div>
-
-                    <!-- FORM -->
-                    <form action="{% url 'edit_profile' %}" method="POST" enctype="multipart/form-data">
-                        {% csrf_token %}
-
-                        <div class="form-grid">
-
-                            <div class="form-group">
-                                <label>First Name</label>
-                                {{ user_form.first_name }}
-                            </div>
-
-                            <div class="form-group">
-                                <label>Last Name</label>
-                                {{ user_form.last_name }}
-                            </div>
-
-                            <div class="form-group">
-                                <label>Phone Number</label>
-                                {{ user_form.phone_number }}
-                            </div>
-
-                            <div class="form-group">
-                                <label>Profile Picture</label>
-                                {{ profile_form.profile_picture }}
-                            </div>
-
-                            <div class="form-group full">
-                                <label>Address Line 1</label>
-                                {{ profile_form.address_line_1 }}
-                            </div>
-
-                            <div class="form-group full">
-                                <label>Address Line 2</label>
-                                {{ profile_form.address_line_2 }}
-                            </div>
-
-                            <div class="form-group">
-                                <label>City</label>
-                                {{ profile_form.city }}
-                            </div>
-
-                            <div class="form-group">
-                                <label>State</label>
-                                {{ profile_form.state }}
-                            </div>
-
-                            <div class="form-group">
-                                <label>Country</label>
-                                {{ profile_form.country }}
-                            </div>
-
-                        </div>
-
-                        <button type="submit" class="save-btn">
-                            Save Changes
-                        </button>
-                    </form>
-
                 </div>
-            </main>
 
-        </div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>First Name</label>
+                        {{ user_form.first_name }}
+                    </div>
+                    <div class="form-group">
+                        <label>Last Name</label>
+                        {{ user_form.last_name }}
+                    </div>
+                    <div class="form-group full">
+                        <label>Phone Number</label>
+                        {{ user_form.phone_number }}
+                    </div>
+                    
+                    <div class="form-group full">
+                        <label>Address Line 1</label>
+                        {{ profile_form.address_line_1 }}
+                    </div>
+                    <div class="form-group full">
+                        <label>Address Line 2</label>
+                        {{ profile_form.address_line_2 }}
+                    </div>
+
+                    <div class="form-group">
+                        <label>City</label>
+                        {{ profile_form.city }}
+                    </div>
+                    <div class="form-group">
+                        <label>State</label>
+                        {{ profile_form.state }}
+                    </div>
+                    <div class="form-group full">
+                        <label>Country</label>
+                        {{ profile_form.country }}
+                    </div>
+                </div>
+
+                <button type="submit" class="save-btn">Save Changes</button>
+            </form>
+        </main>
     </div>
-</section>
+</div>
+
+<script>
+// Sidebar Toggle Logic
+function toggleSidebar() {
+    const sidebar = document.getElementById('dashboardSidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+    sidebar.classList.toggle('open');
+    overlay.classList.toggle('show');
+}
+
+// Live Image Preview
+document.getElementById('id_profile_picture').onchange = function (evt) {
+    var tgt = evt.target || window.event.srcElement,
+        files = tgt.files;
+    if (FileReader && files && files.length) {
+        var fr = new FileReader();
+        fr.onload = function () {
+            document.getElementById('profile-img-preview').src = fr.result;
+        }
+        fr.readAsDataURL(files[0]);
+    }
+}
+</script>
 
 {% endblock %}

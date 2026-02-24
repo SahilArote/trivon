@@ -2,86 +2,597 @@
 {% load static %}
 {% block content %}
 
-    <div class="container" style="margin-top: 50px;">
-    <center><i class="fas fa-check-circle" style="font-size: 72px;margin-bottom: 20px;color: #28A745;"></i></center>
-    <h2 class="text-center">Payment Successful</h2>
-    <br>
-    <div class="text-center">
-        <a href="{% url 'store' %}" class="btn btn-success">Shop more</a>
-    </div>
-</div>
+<style>
+    /* ==========================================================================
+       CSS VARIABLES & GLOBAL RESET
+       ========================================================================== */
+    :root {
+        --primary-pink: #ff3f6c;
+        --primary-pink-hover: #e5325b;
+        --success-green: #28a745;
+        --success-green-light: #e8f5e9;
+        --dark-text: #282c3f;
+        --gray-text: #94969f;
+        --border-color: #eaeaec;
+        --bg-soft: #fafafa;
+        --font-main: 'Assistant', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
 
-<div class="container" style="margin: 0 auto;width: 80%;padding: 30px;background: #f9f9f9;margin-top: 30px;margin-bottom: 50px;">
-    <div class="row">
-        <div class="col-md-6">
-            <h5>Order Information</h5>
-            <ul class="list-unstyled">
-                <li><strong>Order #:</strong> {{ order_number }}</li>
-                <li><strong>Transaction ID:</strong> {{ transaction_id }}</li>
-                <li><strong>Order Date:</strong> {{ order.created_at|date:"M d, Y H:i" }}</li>
-                <li><strong>Status:</strong> {{ order.status }}</li>
-            </ul>
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
+
+    body {
+        font-family: var(--font-main);
+        background-color: var(--bg-soft);
+        color: var(--dark-text);
+        -webkit-font-smoothing: antialiased;
+    }
+
+    a {
+        text-decoration: none;
+        color: inherit;
+    }
+
+    ul {
+        list-style: none;
+    }
+
+    /* ==========================================================================
+       ANIMATIONS
+       ========================================================================== */
+    .fade-in {
+        animation: fadeIn 0.6s ease-out forwards;
+        opacity: 0;
+        transform: translateY(15px);
+    }
+
+    @keyframes fadeIn {
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Success Checkmark Animation */
+    .success-circle {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: var(--success-green-light);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 20px;
+        position: relative;
+    }
+
+    .success-icon {
+        width: 40px;
+        height: 40px;
+        stroke: var(--success-green);
+        stroke-width: 3;
+        stroke-dasharray: 48;
+        stroke-dashoffset: 48;
+        animation: drawCheck 0.6s 0.2s ease-out forwards;
+        fill: none;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+    }
+
+    @keyframes drawCheck {
+        to { stroke-dashoffset: 0; }
+    }
+
+    /* Lightweight Confetti Burst */
+    .confetti {
+        position: absolute;
+        width: 8px;
+        height: 8px;
+        background-color: var(--primary-pink);
+        opacity: 0;
+        border-radius: 50%;
+        animation: pop 0.8s ease-out forwards;
+    }
+    .c1 { top: 50%; left: 50%; transform: translate(-50px, -50px); background: #ffca28; animation-delay: 0.1s; }
+    .c2 { top: 50%; left: 50%; transform: translate(40px, -60px); background: #26c6da; animation-delay: 0.2s; }
+    .c3 { top: 50%; left: 50%; transform: translate(-60px, 30px); background: var(--success-green); animation-delay: 0.15s; }
+    .c4 { top: 50%; left: 50%; transform: translate(50px, 40px); background: var(--primary-pink); animation-delay: 0.25s; }
+
+    @keyframes pop {
+        0% { opacity: 1; transform: scale(0) translate(0,0); }
+        100% { opacity: 0; transform: scale(1.5) var(--translate); }
+    }
+    .c1 { --translate: translate(-60px, -80px); }
+    .c2 { --translate: translate(60px, -70px); }
+    .c3 { --translate: translate(-70px, 50px); }
+    .c4 { --translate: translate(70px, 60px); }
+
+    /* ==========================================================================
+       LAYOUT & CONTAINERS
+       ========================================================================== */
+    .success-container {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 30px 15px 80px 15px;
+    }
+
+    .success-header {
+        text-align: center;
+        margin-bottom: 40px;
+        padding: 0 15px;
+    }
+
+    .success-title {
+        font-size: 28px;
+        font-weight: 800;
+        color: var(--dark-text);
+        margin-bottom: 10px;
+    }
+
+    .success-subtitle {
+        font-size: 15px;
+        color: var(--gray-text);
+        line-height: 1.5;
+        max-width: 400px;
+        margin: 0 auto;
+    }
+
+    .order-number-highlight {
+        font-weight: 700;
+        color: var(--dark-text);
+        font-size: 16px;
+        margin-top: 10px;
+        display: block;
+    }
+
+    /* ==========================================================================
+       STEP INDICATOR
+       ========================================================================== */
+    .step-indicator {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 40px;
+    }
+
+    .step {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--gray-text);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .step.completed { color: var(--success-green); }
+
+    .step-line {
+        height: 2px;
+        width: 40px;
+        background-color: var(--border-color);
+        margin: 0 15px;
+    }
+    .step-line.completed { background-color: var(--success-green); }
+
+    /* ==========================================================================
+       GRID & CARDS
+       ========================================================================== */
+    .content-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .card {
+        background: #fff;
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        padding: 24px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+        transition: box-shadow 0.3s ease, transform 0.3s ease;
+    }
+
+    .card:hover {
+        box-shadow: 0 8px 24px rgba(0,0,0,0.05);
+    }
+
+    .section-title {
+        font-size: 16px;
+        font-weight: 700;
+        text-transform: uppercase;
+        color: var(--dark-text);
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    /* ==========================================================================
+       INFO & BILLING LISTS
+       ========================================================================== */
+    .info-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .info-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        font-size: 14px;
+    }
+
+    .info-label {
+        color: var(--gray-text);
+    }
+
+    .info-value {
+        font-weight: 600;
+        color: var(--dark-text);
+        text-align: right;
+    }
+
+    .status-pill {
+        background: var(--success-green-light);
+        color: var(--success-green);
+        padding: 4px 12px;
+        border-radius: 50px;
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        display: inline-block;
+    }
+
+    .address-box {
+        font-size: 14px;
+        color: var(--gray-text);
+        line-height: 1.6;
+    }
+
+    .address-name {
+        font-weight: 700;
+        color: var(--dark-text);
+        font-size: 15px;
+        margin-bottom: 8px;
+        display: block;
+    }
+
+    /* ==========================================================================
+       ITEMS LIST (REPLACING TABLE)
+       ========================================================================== */
+    .item-list {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .item-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-bottom: 16px;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .item-row:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+
+    .item-details {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .item-name {
+        font-size: 15px;
+        font-weight: 700;
+        color: var(--dark-text);
+    }
+
+    .item-qty {
+        font-size: 13px;
+        color: var(--gray-text);
+    }
+
+    .item-pricing {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 4px;
+    }
+
+    .item-total {
+        font-size: 15px;
+        font-weight: 700;
+        color: var(--dark-text);
+    }
+
+    .item-unit {
+        font-size: 12px;
+        color: var(--gray-text);
+    }
+
+    /* ==========================================================================
+       PRICING SUMMARY
+       ========================================================================== */
+    .summary-card {
+        background: #fff;
+    }
+
+    .summary-row {
+        display: flex;
+        justify-content: space-between;
+        font-size: 14px;
+        color: var(--dark-text);
+        margin-bottom: 15px;
+    }
+
+    .summary-row.grand-total {
+        font-size: 18px;
+        font-weight: 800;
+        border-top: 1px solid var(--border-color);
+        padding-top: 15px;
+        margin-top: 5px;
+        margin-bottom: 25px;
+    }
+
+    /* ==========================================================================
+       BUTTONS
+       ========================================================================== */
+    .btn-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .btn-primary {
+        background-color: var(--primary-pink);
+        color: #fff;
+        border: none;
+        padding: 16px 24px;
+        font-size: 15px;
+        font-weight: 700;
+        border-radius: 8px;
+        cursor: pointer;
+        text-transform: uppercase;
+        width: 100%;
+        text-align: center;
+        transition: background-color 0.3s, transform 0.2s;
+        box-shadow: 0 4px 12px rgba(255, 63, 108, 0.2);
+    }
+
+    .btn-primary:hover {
+        background-color: var(--primary-pink-hover);
+        transform: translateY(-2px);
+    }
+
+    .btn-ghost {
+        background-color: transparent;
+        color: var(--dark-text);
+        border: 1px solid var(--border-color);
+        padding: 16px 24px;
+        font-size: 14px;
+        font-weight: 700;
+        border-radius: 8px;
+        cursor: pointer;
+        width: 100%;
+        text-align: center;
+        transition: background-color 0.3s;
+    }
+
+    .btn-ghost:hover {
+        background-color: var(--bg-soft);
+    }
+
+    .delivery-note {
+        background: #e6f6f4;
+        color: var(--success-green);
+        padding: 12px;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 25px;
+    }
+
+    /* ==========================================================================
+       DESKTOP MEDIA QUERIES
+       ========================================================================== */
+    @media (min-width: 768px) {
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr;
+            gap: 30px;
+            align-items: start;
+        }
+
+        .left-col {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .right-col {
+            position: sticky;
+            top: 30px;
+        }
+
+        .two-col-cards {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+    }
+</style>
+
+<div class="success-container fade-in">
+
+    <div class="step-indicator">
+        <div class="step completed">
+            <span>✓ Cart</span>
         </div>
-        <div class="col-md-6 text-right">
-            <h5>Billing To</h5>
-            {% if order %}
-            <address>
-                <strong>{{ order.full_name }}</strong><br>
-                {{ order.address_line_1 }}{% if order.address_line_2 %}, {{ order.address_line_2 }}{% endif %}<br>
-                {{ order.city }}, {{ order.state }} - {{ order.pincode }}<br>
-                {{ order.country }}<br>
-                <abbr title="Phone">P:</abbr> {{ order.phone }}<br>
-                <a href="mailto:{{ order.email }}">{{ order.email }}</a>
-            </address>
-            {% endif %}
+        <div class="step-line completed"></div>
+        <div class="step completed">
+            <span>✓ Address</span>
+        </div>
+        <div class="step-line completed"></div>
+        <div class="step completed">
+            <span>✓ Payment</span>
         </div>
     </div>
 
-    <hr>
+    <div class="success-header">
+        <div class="success-circle">
+            <div class="confetti c1"></div>
+            <div class="confetti c2"></div>
+            <div class="confetti c3"></div>
+            <div class="confetti c4"></div>
+            
+            <svg class="success-icon" viewBox="0 0 24 24">
+                <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+        </div>
+        <h1 class="success-title">Payment Successful!</h1>
+        <p class="success-subtitle">
+            Thank you for your purchase. Your order is being processed and will be shipped soon.
+            <span class="order-number-highlight">Order ID: {{ order_number }}</span>
+        </p>
+    </div>
+    
 
-    <div class="row">
-        <div class="col-md-12">
-            <h5>Items</h5>
-            <div class="table-responsive">
-                <table class="table table-bordered">
-                    <thead>
-                        <tr>
-                            <th>Description</th>
-                            <th class="text-center">Qty</th>
-                            <th scope="col" class="text-center">Unit Price</th>
-                            <th scope="col" class="text-center">Line Total</th>
+    <div class="content-grid">
+        
+        <div class="left-col">
+            
+            <div class="two-col-cards">
+                <div class="card">
+                    <h2 class="section-title">Order Info</h2>
+                    <div class="info-list">
+                        <div class="info-row">
+                            <span class="info-label">Order #</span>
+                            <span class="info-value">{{ order_number }}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Transaction ID</span>
+                            <span class="info-value">{{ transaction_id }}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Date</span>
+                            <span class="info-value">{{ order.created_at|date:"M d, Y H:i" }}</span>
+                        </div>
+                        <div class="info-row" style="margin-top: 4px;">
+                            <span class="info-label">Status</span>
+                            <span class="status-pill">{{ order.status }}</span>
+                        </div>
+                    </div>
+                </div>
 
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for item in ordered_products %}
-                        <tr>
-                            <td>{{ item.product.product_name }}</td>
-                            <td class="text-center">{{ item.quantity }}</td>
-                            <td class="text-right">$ {{ item.product_price }}</td>
-                            <td class="text-right">$ {{ item.product_price|floatformat:2|add:0|stringformat:"s"|floatformat:2 }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                    <tfoot>
-                        <tr>
-                            <th colspan="3" class="text-right">Subtotal:</th>
-                            <th class="text-right">$ {{ subtotal|floatformat:2 }}</th>
-                        </tr>
-                        <tr>
-                            <th colspan="3" class="text-right">Tax:</th>
-                            <th class="text-right">$ {{ order.tax|floatformat:2 }}</th>
-                        </tr>
-                        <tr>
-                            <th colspan="3" class="text-right">Grand Total:</th>
-                            <th class="text-right">$ {{ order.order_total|floatformat:2 }}</th>
-                        </tr>
-                    </tfoot>
-                </table>
+                <div class="card">
+                    <h2 class="section-title">Billing Address</h2>
+                    {% if order %}
+                    <div class="address-box">
+                        <span class="address-name">{{ order.full_name }}</span>
+                        {{ order.address_line_1 }}{% if order.address_line_2 %}, {{ order.address_line_2 }}{% endif %}<br>
+                        {{ order.city }}, {{ order.state }} - {{ order.pincode }}<br>
+                        {{ order.country }}<br><br>
+                        <span style="color: var(--dark-text); font-weight: 600;">Phone:</span> {{ order.phone }}<br>
+                        <span style="color: var(--dark-text); font-weight: 600;">Email:</span> {{ order.email }}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="card">
+                        <h2 class="section-title">Items Ordered</h2>
+                        <div class="item-list">
+                            {% for item in ordered_products %}
+                            <div class="item-row">
+                                <div class="item-details">
+                                    <span class="item-name">{{ item.product.product_name }}</span>
+                                    <span class="item-qty">Qty: {{ item.quantity }}</span>
+                                </div>
+                                <div class="item-pricing">
+                                    <span class="item-total">$ {{ item.product_price|floatformat:2|add:0|stringformat:"s"|floatformat:2 }}</span>
+                                    <span class="item-unit">$ {{ item.product_price }} each</span>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="card mt-4 shadow-sm">
+            <div class="card-body">
+                <h4 class="mb-3">🚚 Shipment Tracking</h4>
+
+                <p><strong>AWB Code:</strong> {{ order.awb_code }}</p>
+                <p><strong>Courier:</strong> {{ order.courier_name|default:"Not Assigned" }}</p>
+                <p><strong>Status:</strong> {{ order.shipment_status }}</p>
+
+                <!-- Progress Bar -->
+                <div class="progress mt-3" style="height: 25px;">
+                    {% if order.shipment_status == "Sandbox Mode" %}
+                        <div class="progress-bar bg-warning" style="width: 25%;">Processing</div>
+                    {% elif order.shipment_status == "AWB Assigned" %}
+                        <div class="progress-bar bg-info" style="width: 50%;">Shipped</div>
+                    {% elif order.shipment_status == "Delivered" %}
+                        <div class="progress-bar bg-success" style="width: 100%;">Delivered</div>
+                    {% else %}
+                        <div class="progress-bar bg-secondary" style="width: 10%;">Pending</div>
+                    {% endif %}
+                </div>
             </div>
         </div>
-    </div>
 
+        </div>
+
+        <div class="right-col">
+            <div class="card summary-card">
+                <h2 class="section-title">Payment Summary</h2>
+                
+                <div class="summary-row">
+                    <span class="info-label">Subtotal</span>
+                    <span class="info-value">$ {{ subtotal|floatformat:2 }}</span>
+                </div>
+                <div class="summary-row">
+                    <span class="info-label">Tax</span>
+                    <span class="info-value">$ {{ order.tax|floatformat:2 }}</span>
+                </div>
+                
+                <div class="summary-row grand-total">
+                    <span>Grand Total</span>
+                    <span>$ {{ order.order_total|floatformat:2 }}</span>
+                </div>
+
+                <div class="delivery-note">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg>
+                    <span>Estimated Delivery: 3-5 Business Days</span>
+                </div>
+
+                <div class="btn-actions">
+                    <a href="{% url 'store' %}" class="btn-primary">Continue Shopping</a>
+                    <a href="#" class="btn-ghost" onclick="window.print(); return false;">Download Invoice</a>
+                </div>
+            </div>
+        </div>
+
+    </div>
 </div>
 
-{% endblock  %}
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+    });
+</script>
+
+{% endblock %}

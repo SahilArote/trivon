@@ -2,161 +2,865 @@
 {% load static %}
 
 {% block content %}
+<style>
+    /* ==========================================================================
+       CSS VARIABLES & GLOBAL RESET
+       ========================================================================== */
+    :root {
+        --primary-pink: #ff3f6c;
+        --primary-pink-hover: #e5325b;
+        --dark-text: #282c3f;
+        --gray-text: #94969f;
+        --light-gray: #f5f5f6;
+        --border-color: #eaeaec;
+        --success-green: #03a685;
+        --bg-soft: #fafafa;
+        --font-main: 'Assistant', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
 
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
 
-<section class="section-content padding-y bg">
-<div class="container">
+    body {
+        font-family: var(--font-main);
+        background-color: var(--bg-soft);
+        color: var(--dark-text);
+        -webkit-font-smoothing: antialiased;
+    }
 
-<!-- ============================ COMPONENT 1 ================================= -->
+    a {
+        text-decoration: none;
+        color: inherit;
+    }
 
-<div class="row">
-	<aside class="col-lg-6">
-<div class="card">
-  <div class="card-body">
-    <h4 class="card-title mb-4">Billing Address</h4>
-    {% if form.non_field_errors %}
-      <div class="alert alert-danger">
-        {% for error in form.non_field_errors %}
-          <p>{{ error }}</p>
-        {% endfor %}
-      </div>
-    {% endif %}
-    <form action="{% url 'place_order' %}" method="POST">
-      {% csrf_token %}
-      <div class="form-row">
-        <div class="col form-group">
-          <label for="">First Name</label>
-          <input type="text" name="first_name" class="form-control" required>
+    /* ==========================================================================
+       PAGE ANIMATIONS & LAYOUT
+       ========================================================================== */
+    .fade-in {
+        animation: fadeIn 0.6s ease-out forwards;
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    @keyframes fadeIn {
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .checkout-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px 15px 100px 15px; /* Bottom padding for mobile sticky bar */
+    }
+
+    /* ==========================================================================
+       STEP INDICATOR
+       ========================================================================== */
+    .step-indicator {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 30px;
+        padding-top: 10px;
+    }
+
+    .step {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--gray-text);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        position: relative;
+        z-index: 1;
+    }
+
+    .step.active {
+        color: var(--primary-pink);
+    }
+
+    .step.completed {
+        color: var(--success-green);
+    }
+
+    .step-line {
+        height: 2px;
+        width: 40px;
+        background-color: var(--border-color);
+        margin: -15px 15px 0 15px;
+    }
+
+    .step-line.completed {
+        background-color: var(--success-green);
+    }
+
+    /* ==========================================================================
+       MAIN LAYOUT (MOBILE FIRST)
+       ========================================================================== */
+    .checkout-layout {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .card {
+        background: #fff;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+        transition: box-shadow 0.3s ease;
+    }
+
+    .card:hover {
+        box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    }
+
+    .section-title {
+        font-size: 16px;
+        font-weight: 700;
+        margin-bottom: 20px;
+        text-transform: uppercase;
+        color: var(--dark-text);
+    }
+
+    /* ==========================================================================
+       BILLING FORM (FLOATING LABELS)
+       ========================================================================== */
+    .form-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+
+    .form-floating {
+        position: relative;
+    }
+
+    .form-control {
+        width: 100%;
+        height: 54px;
+        padding: 22px 15px 8px;
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        outline: none;
+        transition: border-color 0.3s, box-shadow 0.3s;
+        font-family: inherit;
+        font-size: 15px;
+        color: var(--dark-text);
+        background: #fff;
+    }
+
+    .form-control:focus {
+        border-color: var(--primary-pink);
+    }
+
+    /* Floating label magic */
+    .form-floating label {
+        position: absolute;
+        left: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--gray-text);
+        transition: all 0.2s ease;
+        pointer-events: none;
+        font-size: 14px;
+    }
+
+    .form-control:focus + label,
+    .form-control:not(:placeholder-shown) + label {
+        top: 14px;
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--gray-text);
+    }
+
+    .form-control:focus + label {
+        color: var(--primary-pink);
+    }
+
+    textarea.form-control {
+        height: auto;
+        min-height: 80px;
+        resize: vertical;
+        padding-top: 26px;
+    }
+
+    /* Form Errors */
+    .error-box {
+        background-color: #fce8e8;
+        border-left: 4px solid #f44336;
+        padding: 12px 15px;
+        margin-bottom: 20px;
+        border-radius: 4px;
+        font-size: 14px;
+        color: #d32f2f;
+    }
+    
+    .field-error {
+        color: #d32f2f;
+        font-size: 12px;
+        margin-top: 4px;
+        display: block;
+    }
+
+    /* ==========================================================================
+       ORDER SUMMARY (MOBILE ACCORDION / DESKTOP STICKY)
+       ========================================================================== */
+    .mobile-summary-toggle {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: var(--bg-soft);
+        border: 1px solid var(--border-color);
+        padding: 15px 20px;
+        border-radius: 8px;
+        font-weight: 700;
+        cursor: pointer;
+        color: var(--primary-pink);
+        margin-bottom: 20px;
+    }
+
+    .mobile-summary-toggle svg {
+        transition: transform 0.3s ease;
+    }
+
+    .mobile-summary-toggle.expanded svg {
+        transform: rotate(180deg);
+    }
+
+    .summary-content {
+        display: none; /* Hidden on mobile by default */
+    }
+
+    .summary-content.show {
+        display: block;
+    }
+
+    .cart-item-row {
+        display: flex;
+        gap: 15px;
+        padding-bottom: 15px;
+        margin-bottom: 15px;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .cart-item-img {
+        width: 60px;
+        height: 80px;
+        object-fit: cover;
+        border-radius: 4px;
+        background: var(--light-gray);
+    }
+
+    .cart-item-info {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .cart-item-title {
+        font-size: 14px;
+        font-weight: 700;
+        color: var(--dark-text);
+        margin-bottom: 4px;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .cart-item-meta {
+        font-size: 12px;
+        color: var(--gray-text);
+        margin-bottom: 6px;
+    }
+
+    .cart-item-price-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: auto;
+    }
+
+    .cart-item-price {
+        font-weight: 700;
+        font-size: 14px;
+    }
+    
+    .cart-item-price-each {
+        font-weight: 400;
+        color: var(--gray-text);
+        font-size: 11px;
+    }
+
+    .price-row {
+        display: flex;
+        justify-content: space-between;
+        font-size: 14px;
+        color: var(--dark-text);
+        margin-bottom: 12px;
+    }
+
+    .price-row.total {
+        font-size: 16px;
+        font-weight: 700;
+        border-top: 1px solid var(--border-color);
+        padding-top: 15px;
+        margin-top: 5px;
+        margin-bottom: 0;
+    }
+
+    .delivery-estimate {
+        background: #e6f6f4;
+        color: var(--success-green);
+        padding: 10px 15px;
+        border-radius: 4px;
+        font-size: 13px;
+        font-weight: 600;
+        margin-top: 15px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .trust-badges {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-top: 20px;
+        padding-top: 20px;
+        border-top: 1px dashed var(--border-color);
+    }
+
+    .trust-badge-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 12px;
+        color: var(--gray-text);
+    }
+
+    .trust-badge-item svg {
+        width: 18px;
+        height: 18px;
+        fill: var(--primary-pink);
+    }
+
+    /* ==========================================================================
+       BUTTONS & STICKY BAR
+       ========================================================================== */
+    .btn-pink {
+        background-color: var(--primary-pink);
+        color: #fff;
+        border: none;
+        padding: 14px 20px;
+        font-size: 15px;
+        font-weight: 700;
+        border-radius: 4px;
+        cursor: pointer;
+        text-transform: uppercase;
+        width: 100%;
+        transition: background-color 0.3s, transform 0.2s;
+        text-align: center;
+        display: inline-block;
+    }
+
+    .btn-pink:hover {
+        background-color: var(--primary-pink-hover);
+    }
+
+    .btn-pink:active {
+        transform: scale(0.98);
+    }
+
+    .btn-outline {
+        background: transparent;
+        color: var(--dark-text);
+        border: 1px solid var(--border-color);
+        padding: 14px 20px;
+        font-size: 14px;
+        font-weight: 600;
+        border-radius: 4px;
+        cursor: pointer;
+        width: 100%;
+        text-align: center;
+        display: block;
+        margin-top: 10px;
+        transition: background 0.3s;
+    }
+
+    .btn-outline:hover {
+        background: var(--light-gray);
+    }
+
+    .mobile-sticky-bar {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: #fff;
+        padding: 12px 15px;
+        box-shadow: 0 -4px 12px rgba(0,0,0,0.08);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        z-index: 100;
+    }
+
+    .mobile-total-wrap {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .mobile-total-label {
+        font-size: 11px;
+        color: var(--gray-text);
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+
+    .mobile-total-amount {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--dark-text);
+    }
+
+    .mobile-sticky-bar .btn-pink {
+        width: auto;
+        padding: 12px 30px;
+    }
+
+    .desktop-submit-wrap {
+        display: none;
+    }
+
+    /* ==========================================================================
+       CUSTOM CONFIRMATION MODAL
+       ========================================================================== */
+    .custom-modal-overlay {
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(0,0,0,0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.3s, visibility 0.3s;
+    }
+
+    .custom-modal-overlay.active {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .custom-modal {
+        background: #fff;
+        border-radius: 8px;
+        padding: 25px;
+        width: 90%;
+        max-width: 360px;
+        text-align: center;
+        transform: scale(0.9);
+        transition: transform 0.3s;
+    }
+
+    .custom-modal-overlay.active .custom-modal {
+        transform: scale(1);
+    }
+
+    .modal-title {
+        font-size: 18px;
+        font-weight: 700;
+        margin-bottom: 10px;
+    }
+
+    .modal-text {
+        font-size: 14px;
+        color: var(--gray-text);
+        margin-bottom: 25px;
+        line-height: 1.5;
+    }
+
+    .modal-actions {
+        display: flex;
+        gap: 15px;
+    }
+
+    .modal-btn {
+        flex: 1;
+        padding: 12px;
+        border-radius: 4px;
+        font-weight: 700;
+        font-size: 14px;
+        cursor: pointer;
+        border: none;
+    }
+
+    .modal-btn-cancel {
+        background: var(--light-gray);
+        color: var(--dark-text);
+        border: 1px solid var(--border-color);
+    }
+
+    .modal-btn-confirm {
+        background: var(--primary-pink);
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .spinner {
+        display: none;
+        width: 16px;
+        height: 16px;
+        border: 2px solid #fff;
+        border-bottom-color: transparent;
+        border-radius: 50%;
+        animation: rotation 1s linear infinite;
+    }
+
+    @keyframes rotation {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    /* ==========================================================================
+       DESKTOP MEDIA QUERIES
+       ========================================================================== */
+    @media (min-width: 768px) {
+        .checkout-container {
+            padding-bottom: 40px;
+        }
+
+        .checkout-layout {
+            flex-direction: row;
+            align-items: flex-start;
+            gap: 30px;
+        }
+
+        .checkout-left {
+            flex: 0 0 60%;
+        }
+
+        .checkout-right {
+            flex: 0 0 calc(40% - 30px);
+            position: sticky;
+            top: 20px;
+        }
+
+        .form-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        /* Order note spans full width on desktop */
+        .form-full-width {
+            grid-column: span 2;
+        }
+
+        .mobile-summary-toggle {
+            display: none;
+        }
+
+        .summary-content {
+            display: block !important;
+        }
+
+        .mobile-sticky-bar {
+            display: none;
+        }
+
+        .desktop-submit-wrap {
+            display: block;
+            margin-top: 20px;
+        }
+    }
+</style>
+
+<div class="checkout-container fade-in">
+    
+    <div class="step-indicator">
+        <div class="step completed">
+            <span>✓ Cart</span>
         </div>
-        <div class="col form-group">
-          <label for="">Last Name</label>
-          <input type="text" name="last_name" class="form-control" required>
+        <div class="step-line completed"></div>
+        <div class="step active">
+            <span>● Address</span>
         </div>
-      </div>
-      <div class="form-row">
-        <div class="col form-group">
-          <label for="">Email</label>
-          <input type="email" name="email" class="form-control" required>
+        <div class="step-line"></div>
+        <div class="step">
+            <span>Payment</span>
         </div>
-        <div class="col form-group">
-          <label for="">Phone Number</label>
-          <input type="number" name="phone" class="form-control" required min="0" title="Please enter numbers only">
-          {% if form.phone.errors %}
-            <small class="text-danger">
-              {% for error in form.phone.errors %}
-                {{ error }}<br>
-              {% endfor %}
-            </small>
-          {% endif %}
+    </div>
+
+    <form action="{% url 'place_order' %}" method="POST" id="checkout-form">
+        {% csrf_token %}
+
+        <div class="checkout-layout">
+            
+            <div class="checkout-left">
+                <div class="card">
+                    <h4 class="section-title">Delivery Address</h4>
+                    
+                    {% if form.non_field_errors %}
+                        <div class="error-box" id="form-errors">
+                            {% for error in form.non_field_errors %}
+                                <p style="margin:0;">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+
+                    <div class="form-grid">
+                        <div class="form-floating">
+                            <input type="text" name="first_name" id="first_name" class="form-control" placeholder=" " required>
+                            <label for="first_name">First Name *</label>
+                        </div>
+                        
+                        <div class="form-floating">
+                            <input type="text" name="last_name" id="last_name" class="form-control" placeholder=" " required>
+                            <label for="last_name">Last Name *</label>
+                        </div>
+
+                        <div class="form-floating">
+                            <input type="email" name="email" id="email" class="form-control" placeholder=" " required>
+                            <label for="email">Email ID *</label>
+                        </div>
+
+                        <div class="form-floating">
+                            <input type="number" name="phone" id="phone" class="form-control js-pincode-detect" placeholder=" " required min="0">
+                            <label for="phone">Phone Number *</label>
+                            {% if form.phone.errors %}
+                                {% for error in form.phone.errors %}
+                                    <span class="field-error">{{ error }}</span>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+
+                        <div class="form-floating form-full-width">
+                            <input type="text" name="address_line_1" id="address_line_1" class="form-control" placeholder=" " required>
+                            <label for="address_line_1">Address Line 1 *</label>
+                        </div>
+
+                        <div class="form-floating form-full-width">
+                            <input type="text" name="address_line_2" id="address_line_2" class="form-control" placeholder=" ">
+                            <label for="address_line_2">Address Line 2 (Optional)</label>
+                        </div>
+
+                        <div class="form-floating">
+                            <input type="text" name="city" id="city" class="form-control" placeholder=" " required>
+                            <label for="city">City / District *</label>
+                        </div>
+
+                        <div class="form-floating">
+                            <input type="text" name="state" id="state" class="form-control" placeholder=" " required>
+                            <label for="state">State *</label>
+                        </div>
+
+                        <div class="form-floating">
+                            <input type="text" name="pincode" id="pincode" class="form-control" placeholder=" " required>
+                            <label for="pincode">Pincode *</label>
+                        </div>
+
+                        <div class="form-floating">
+                            <input type="text" name="country" id="country" class="form-control" placeholder=" " value="India" required>
+                            <label for="country">Country *</label>
+                        </div>
+
+                        <div class="form-floating form-full-width">
+                            <textarea name="order_note" id="order_note" class="form-control" placeholder=" "></textarea>
+                            <label for="order_note">Order Note (Optional)</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="checkout-right">
+                
+                <div class="mobile-summary-toggle" id="summaryToggle">
+                    <span>🛒 Show Order Summary</span>
+                    <span style="display: flex; align-items: center; gap: 8px;">
+                        ${{ grand_totel }}
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </span>
+                </div>
+
+                <div class="card summary-content" id="summaryContent">
+                    <h4 class="section-title">Order Summary</h4>
+                    
+                    <div style="max-height: 300px; overflow-y: auto; padding-right: 5px; margin-bottom: 15px;">
+                        {% for cart_item in cart_items %}
+                        <div class="cart-item-row">
+                            <img src="{{ cart_item.product.image.url }}" class="cart-item-img" alt="{{ cart_item.product.product_name }}">
+                            <div class="cart-item-info">
+                                <div class="cart-item-title">{{ cart_item.product.product_name }}</div>
+                                <div class="cart-item-meta">
+                                    {% if cart_item.variation.all %}
+                                        {% for item in cart_item.variation.all %}
+                                            {{ item.variation_category|title }}: {{ item.variation_value|title }}<br>
+                                        {% endfor %}
+                                    {% endif %}
+                                    Qty: {{ cart_item.quantity }}
+                                </div>
+                                <div class="cart-item-price-row">
+                                    <span class="cart-item-price">$ {{ cart_item.sub_total }}</span>
+                                    <span class="cart-item-price-each">($ {{ cart_item.product.price }} each)</span>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="price-row">
+                        <span>Total MRP</span>
+                        <span>$ {{ totel }}</span>
+                    </div>
+                    <div class="price-row">
+                        <span>Tax</span>
+                        <span>$ {{ tax }}</span>
+                    </div>
+                    <div class="price-row" style="color: var(--success-green);">
+                        <span>Shipping</span>
+                        <span>FREE</span>
+                    </div>
+                    
+                    <div class="price-row total">
+                        <span>Grand Total</span>
+                        <span>$ {{ grand_totel }}</span>
+                    </div>
+
+                    <div class="delivery-estimate">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg>
+                        <span>Estimated Delivery: 3-5 Business Days</span>
+                    </div>
+
+                    <div class="desktop-submit-wrap">
+                        <button type="button" class="btn-pink js-trigger-modal">Proceed to Payment</button>
+                        <a href="{% url 'cart' %}" class="btn-outline">Modify Cart</a>
+                    </div>
+
+                    <div class="trust-badges">
+                        <div class="trust-badge-item">
+                            <svg viewBox="0 0 24 24"><path d="M12 2L3 7v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-9-5zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V8.53l7-3.89v8.35z"/></svg>
+                            <span>100% Secure Payments</span>
+                        </div>
+                        <div class="trust-badge-item">
+                            <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                            <span>Easy 14 days returns & exchanges</span>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
         </div>
-      </div>
-      <div class="form-row">
-        <div class="col form-group">
-          <label for="">Address Line 1</label>
-          <input type="text" name="address_line_1" class="form-control" required>
-        </div>
-        <div class="col form-group">
-          <label for="">Address Line 2</label>
-          <input type="text" name="address_line_2" class="form-control">
-        </div>
-      </div>
-      <div class="form-row">
-        <div class="col form-group">
-          <label for="">City</label>
-          <input type="text" name="city" class="form-control" required>
-        </div>
-        <div class="col form-group">
-          <label for="">State</label>
-          <input type="text" name="state" class="form-control" required>
-        </div>
-      </div>
-      <div class="form-row">
-        <div class="col form-group">
-          <label for="">country</label>
-          <input type="text" name="country" class="form-control" required>
-        </div>
-        <div class="col form-group">
-          <label for="">pincode</label>
-          <input type="text" name="pincode" class="form-control" required>
-        </div>
-      </div>
 
-
-        <div class="form-row">
-          <label for="">Order Note</label>
-          <textarea name="order_note" rows="2" class="form-control"></textarea>
+        <div class="mobile-sticky-bar">
+            <div class="mobile-total-wrap">
+                <span class="mobile-total-label">Grand Total</span>
+                <span class="mobile-total-amount">$ {{ grand_totel }}</span>
+            </div>
+            <button type="button" class="btn-pink js-trigger-modal">Proceed to Payment</button>
         </div>
 
+    </form>
+</div>
 
-  </div>
-</div> <!-- card.// -->
+<div class="custom-modal-overlay" id="confirmModal">
+    <div class="custom-modal">
+        <div class="modal-title">Confirm Address</div>
+        <div class="modal-text">Are you sure the delivery details are correct? You will be securely redirected to payment.</div>
+        <div class="modal-actions">
+            <button type="button" class="modal-btn modal-btn-cancel" id="cancelSubmit">Review Again</button>
+            <button type="button" class="modal-btn modal-btn-confirm" id="confirmSubmit">
+                <span>Yes, Proceed</span>
+                <div class="spinner" id="btnSpinner"></div>
+            </button>
+        </div>
+    </div>
+</div>
 
-	</aside> <!-- col.// -->
-	<aside class="col-lg-6">
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        
+        // 1. Smooth Scroll to Errors
+        const errorBox = document.getElementById('form-errors');
+        if (errorBox) {
+            errorBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
 
-		<div class="card">
-		<div class="card-body">
-      <table class="table table-borderless table-shopping-cart">
-      <thead class="text-muted">
-      <tr class="small text-uppercase">
-        <th scope="col">Product</th>
-        <th scope="col" width="120">Quantity</th>
-        <th scope="col" width="120">Price</th>
+        // 2. Mobile Accordion Toggle
+        const summaryToggle = document.getElementById('summaryToggle');
+        const summaryContent = document.getElementById('summaryContent');
+        
+        if(summaryToggle) {
+            summaryToggle.addEventListener('click', function() {
+                this.classList.toggle('expanded');
+                summaryContent.classList.toggle('show');
+            });
+        }
 
-      </tr>
-      </thead>
-      <tbody>
+        // 3. Custom Modal & Form Submit Interception
+        const mainForm = document.getElementById('checkout-form');
+        const triggerBtns = document.querySelectorAll('.js-trigger-modal');
+        const modalOverlay = document.getElementById('confirmModal');
+        const cancelBtn = document.getElementById('cancelSubmit');
+        const confirmBtn = document.getElementById('confirmSubmit');
+        const btnSpinner = document.getElementById('btnSpinner');
 
-      {% for cart_item in cart_items %}
-<tr>
-	<td>
-		<figure class="itemside align-items-center">
-			<div class="aside"><img src="{{ cart_item.product.image.url }}" class="img-sm"></div>
-			<figcaption class="info">
-				<a href="{{ cart_item.product.get_url }}" class="title text-dark">{{ cart_item.product.product_name }}</a>
-				<p class="text-muted small">
-					{% if cart_item.variation.all %}
-						{% for item in cart_item.variation.all %}
-							{{ item.variation_category }}: {{ item.variation_value }}<br>
-						{% endfor %}
-					{% endif %}
-				</p>
-			</figcaption>
-		</figure>
-      	</td>
-      	<td>
-      		<!-- col.// -->
-      				<label for="">{{cart_item.quantity}}</label>
-      	</td>
-      	<td>
-      		<div class="price-wrap">
-      			<var class="price">$ {{ cart_item.sub_total }}</var>
-      			<small class="text-muted"> $ {{ cart_item.product.price }} each </small>
-      		</div> <!-- price-wrap .// -->
-      	</td>
+        // Function to check HTML5 validity before showing modal
+        function validateForm() {
+            if (!mainForm.checkValidity()) {
+                mainForm.reportValidity(); // Triggers native browser tooltips
+                return false;
+            }
+            return true;
+        }
 
-      </tr>
-      {% endfor %}
+        // Trigger modal on button click (if valid)
+        triggerBtns.forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                if(validateForm()) {
+                    modalOverlay.classList.add('active');
+                }
+            });
+        });
 
-      </tbody>
-      </table>
+        // Close modal
+        cancelBtn.addEventListener('click', () => {
+            modalOverlay.classList.remove('active');
+        });
 
-      <button type="submit" name="submit" class="btn btn-primary btn-block">Place Order</button>
-			<a href="{% url 'store' %}" class="btn btn-light btn-block">Continue Shopping</a>
-      </form>
-		</div> <!-- card-body.// -->
-		</div> <!-- card.// -->
+        // Close modal on outside click
+        modalOverlay.addEventListener('click', function(e) {
+            if(e.target === modalOverlay) {
+                modalOverlay.classList.remove('active');
+            }
+        });
 
-
-</aside> <!-- col.// -->
-
-
-</div> <!-- row.// -->
-
-<!-- ============================ COMPONENT 1 END .// ================================= -->
-
-</div> <!-- container .//  -->
-</section>
-<!-- ========================= SECTION CONTENT END// ========================= -->
-
+        // Confirm & Submit
+        confirmBtn.addEventListener('click', function() {
+            // UI Loading state
+            this.querySelector('span').textContent = 'Processing...';
+            btnSpinner.style.display = 'block';
+            this.style.opacity = '0.8';
+            this.style.pointerEvents = 'none';
+            cancelBtn.style.pointerEvents = 'none';
+            
+            // Subtle delay for premium feel, then submit
+            setTimeout(() => {
+                mainForm.submit();
+            }, 600);
+        });
+    });
+</script>
 {% endblock %}

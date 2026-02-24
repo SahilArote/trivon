@@ -19,5 +19,10 @@ urlpatterns = [
     path('edit_profile/', views.edit_profile, name='edit_profile'),
     path('change_password/', views.change_password, name='change_password'),
     path('order_detail/<int:order_id>/', views.order_detail, name='order_detail'),
+    # The main tracking page
+    path('track-order/<str:order_number>/', views.track_order, name='track_order'),
+    
+    # The AJAX endpoint for auto-refreshing
+    path('api/track-order/<str:order_number>/status/', views.order_status_api, name='order_status_api'),
 
 ]
