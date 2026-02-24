@@ -14,6 +14,9 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 
 from pathlib import Path
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -24,10 +27,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-ql6^0*7h2=9h761h@0y6gpp*y6b6h&-mr^k@p__#ca=*uc+78e'
+SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DEBUG') == 'True'
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
@@ -54,6 +57,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -132,12 +136,19 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
-STATIC_ROOT = BASE_DIR / 'static'
-STATICFILES_DIRS = [
-    'trivon/static',
-    ]
 
-# media files
+# Your workspace: Where Django looks for your custom static files during development
+STATICFILES_DIRS = [
+    BASE_DIR / 'trivon/static',  # Using BASE_DIR makes the path completely foolproof
+]
+
+# The shipping box: Where collectstatic gathers everything for production
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+# WhiteNoise: Compresses and caches your static files so they load instantly
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+# media files (User-uploaded content like profile pics or product images)
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
@@ -156,8 +167,8 @@ MESSAGE_TAGS = {
 # SMTP configration
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
-EMAIL_HOST_USER = 'arotesahil2@gmail.com'
-EMAIL_HOST_PASSWORD ='ysum njou tuya cnxr'
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 EMAIL_USE_TLS = True
 
 
@@ -169,6 +180,6 @@ GOOGLE_CLIENT_SECRET = os.getenv('GOOGLE_CLIENT_SECRET')
 
 LOGIN_REDIRECT_URL = 'dashboard'
 
-SHIPROCKET_EMAIL = "arotesahil89@gmail.com"
-SHIPROCKET_PASSWORD = "S%VH$jwPG&W2qZF80NwY38ZqpBQMC&n#"
-SHIPROCKET_PICKUP_PINCODE = "400070"
+SHIPROCKET_EMAIL = os.getenv('SHIPROCKET_EMAIL')
+SHIPROCKET_PASSWORD = os.getenv('SHIPROCKET_PASSWORD')
+SHIPROCKET_PICKUP_PINCODE = os.getenv('SHIPROCKET_PICKUP_PINCODE')
