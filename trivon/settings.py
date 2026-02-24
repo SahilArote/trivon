@@ -53,6 +53,10 @@ INSTALLED_APPS = [
     'carts',
     'orders',
 
+    'cloudinary_storage',
+    'django.contrib.staticfiles',
+    'cloudinary',
+
     
 ]
 
@@ -164,6 +168,7 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 
 
+
 from django.contrib.messages import constants as messages
 
 MESSAGE_TAGS = {
@@ -191,3 +196,11 @@ LOGIN_REDIRECT_URL = 'dashboard'
 SHIPROCKET_EMAIL = os.getenv('SHIPROCKET_EMAIL')
 SHIPROCKET_PASSWORD = os.getenv('SHIPROCKET_PASSWORD')
 SHIPROCKET_PICKUP_PINCODE = os.getenv('SHIPROCKET_PICKUP_PINCODE')
+
+
+# Cloudinary Configuration
+
+
+# Tell Django to use Cloudinary for Media files
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+

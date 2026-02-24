@@ -17,7 +17,7 @@ from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import EmailMessage
 from django.conf import settings
 from urllib.parse import urlencode
-# Create your views here.
+
 
 
 def register(request):
@@ -221,7 +221,10 @@ def dashboard(request):
     orders = Order.objects.order_by('-created_at').filter(user_id=request.user.id, is_ordered=True)
     orders_count = orders.count()
 
-    userprofile = UserProfile.objects.get(user_id=request.user.id)
+    try:
+        userprofile = UserProfile.objects.get(user_id=request.user.id)
+    except UserProfile.DoesNotExist:
+        userprofile = UserProfile.objects.create(user_id=request.user.id)
     context = {
         'orders_count': orders_count,
         'userprofile': userprofile,
