@@ -212,5 +212,5 @@ STORAGES = {
 }
 
 # Add this line BACK just to prevent the cloudinary package from crashing
-STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+STATICFILES_STORAGE = "whitenoise.storage.CompressedStaticFilesStorage"
 WHITENOISE_MANIFEST_STRICT = False
