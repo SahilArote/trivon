@@ -1,5 +1,4 @@
 """
-S%VH$jwPG&W2qZF80NwY38ZqpBQMC&n#
 
 Django settings for trivon project.
 
@@ -202,19 +201,19 @@ SHIPROCKET_PICKUP_PINCODE = os.getenv('SHIPROCKET_PICKUP_PINCODE')
 # Cloudinary Configuration
 
 
-# Tell Django to use Cloudinary for Media files
-# Django 6.0 Storage Settings for Media (Cloudinary) and Static (WhiteNoise)
+# --- FINAL STORAGE SETTINGS ---
 
 WHITENOISE_MANIFEST_STRICT = False
+
 STORAGES = {
     "default": {
         "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
     },
     "staticfiles": {
-        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        # YAHAN SE 'Manifest' HATA DIYA GAYA HAI:
+        "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
     },
 }
 
-# Add this line BACK just to prevent the cloudinary package from crashing
 STATICFILES_STORAGE = "whitenoise.storage.CompressedStaticFilesStorage"
 
