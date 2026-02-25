@@ -168,6 +168,8 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 
 
+
+
 from django.contrib.messages import constants as messages
 
 MESSAGE_TAGS = {
@@ -202,6 +204,8 @@ SHIPROCKET_PICKUP_PINCODE = os.getenv('SHIPROCKET_PICKUP_PINCODE')
 
 # Tell Django to use Cloudinary for Media files
 # Django 6.0 Storage Settings for Media (Cloudinary) and Static (WhiteNoise)
+
+WHITENOISE_MANIFEST_STRICT = False
 STORAGES = {
     "default": {
         "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
@@ -213,4 +217,4 @@ STORAGES = {
 
 # Add this line BACK just to prevent the cloudinary package from crashing
 STATICFILES_STORAGE = "whitenoise.storage.CompressedStaticFilesStorage"
-WHITENOISE_MANIFEST_STRICT = False
+
