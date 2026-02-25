@@ -203,6 +203,8 @@ SHIPROCKET_PICKUP_PINCODE = os.getenv('SHIPROCKET_PICKUP_PINCODE')
 
 # --- FINAL STORAGE SETTINGS ---
 
+# --- FINAL STORAGE SETTINGS ---
+
 WHITENOISE_MANIFEST_STRICT = False
 
 STORAGES = {
@@ -210,10 +212,10 @@ STORAGES = {
         "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
     },
     "staticfiles": {
-        # YAHAN SE 'Manifest' HATA DIYA GAYA HAI:
-        "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
+        # Yahan humne WhiteNoise compression hata kar Django ka default laga diya hai
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
     },
 }
 
-STATICFILES_STORAGE = "whitenoise.storage.CompressedStaticFilesStorage"
+STATICFILES_STORAGE = "django.contrib.staticfiles.storage.StaticFilesStorage"
 
