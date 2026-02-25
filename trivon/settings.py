@@ -203,19 +203,26 @@ SHIPROCKET_PICKUP_PINCODE = os.getenv('SHIPROCKET_PICKUP_PINCODE')
 
 # --- FINAL STORAGE SETTINGS ---
 
-# --- FINAL STORAGE SETTINGS ---
-
 WHITENOISE_MANIFEST_STRICT = False
 
+# 1. Cloudinary Credentials
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': os.getenv('CLOUDINARY_CLOUD_NAME'),
+    'API_KEY': os.getenv('CLOUDINARY_API_KEY'),
+    'API_SECRET': os.getenv('CLOUDINARY_API_SECRET'),
+}
+
+# 2. Storage Config
 STORAGES = {
     "default": {
         "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
     },
     "staticfiles": {
-        # Yahan humne WhiteNoise compression hata kar Django ka default laga diya hai
         "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
     },
 }
 
+# 3. Fallbacks for older packages
 STATICFILES_STORAGE = "django.contrib.staticfiles.storage.StaticFilesStorage"
+DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
 
