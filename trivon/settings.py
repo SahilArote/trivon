@@ -157,8 +157,7 @@ STATICFILES_DIRS = [
 # The shipping box: Where collectstatic gathers everything for production
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-# WhiteNoise: Compresses and caches your static files so they load instantly
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
 
 # media files (User-uploaded content like profile pics or product images)
 MEDIA_URL = '/media/'
@@ -202,5 +201,12 @@ SHIPROCKET_PICKUP_PINCODE = os.getenv('SHIPROCKET_PICKUP_PINCODE')
 
 
 # Tell Django to use Cloudinary for Media files
-DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
-
+# Django 6.0 Storage Settings for Media (Cloudinary) and Static (WhiteNoise)
+STORAGES = {
+    "default": {
+        "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
