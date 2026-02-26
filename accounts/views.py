@@ -140,36 +140,61 @@ def google_login(request):
     url = "https://accounts.google.com/o/oauth2/v2/auth?" + urlencode(params)
     return redirect(url)
 
+def google_login(request):
+    params = {
+        "client_id": settings.GOOGLE_CLIENT_ID,
+        "response_type": "code",
+        "scope": "openid email profile",
+        # YAHAN LIVE DOMAIN DAAL DIYA HAI
+        "redirect_uri": "https://trivon.onrender.com/accounts/google/callback/", 
+        "access_type": "online",
+        "prompt": "select_account"
+    }
+    url = "https://accounts.google.com/o/oauth2/v2/auth?" + urlencode(params)
+    return redirect(url)
+
+
 def google_callback(request):
     code = request.GET.get('code')
+    if not code:
+        messages.error(request, "Google login failed.")
+        return redirect('login')
 
     token_url = "https://oauth2.googleapis.com/token"
     data = {
         "code": code,
         "client_id": settings.GOOGLE_CLIENT_ID,
         "client_secret": settings.GOOGLE_CLIENT_SECRET,
-        "redirect_uri": "http://127.0.0.1:8000/accounts/google/callback/",
+        # YAHAN BHI LIVE DOMAIN DAAL DIYA HAI
+        "redirect_uri": "https://trivon.onrender.com/accounts/google/callback/",
         "grant_type": "authorization_code",
     }
 
     token_response = requests.post(token_url, data=data)
     token_json = token_response.json()
-
     access_token = token_json.get('access_token')
 
-    # Get user info
+    # Get user info from Google
     userinfo_url = "https://www.googleapis.com/oauth2/v2/userinfo"
     headers = {"Authorization": f"Bearer {access_token}"}
     userinfo = requests.get(userinfo_url, headers=headers).json()
 
-    email = userinfo['email']
+    email = userinfo.get('email')
     first_name = userinfo.get('given_name', '')
     last_name = userinfo.get('family_name', '')
+    profile_picture_url = userinfo.get('picture', '') # <-- GOOGLE SE PHOTO NIKAL LI
 
-    # 🔐 USER HANDLING (CUSTOM MODEL)
+    # 🔐 USER HANDLING
     try:
         user = Account.objects.get(email=email)
+        # Agar purana user hai par photo nahi hai, toh Google wali photo daal do
+        profile, created = UserProfile.objects.get_or_create(user=user)
+        if profile_picture_url and profile.profile_picture == 'default/defaultprofile.jpg':
+            profile.profile_picture = profile_picture_url
+            profile.save()
+
     except Account.DoesNotExist:
+        # Naya user ban raha hai
         user = Account.objects.create_user(
             first_name=first_name,
             last_name=last_name,
@@ -177,17 +202,19 @@ def google_callback(request):
             username=email.split("@")[0],
             password=None
         )
-        profile = UserProfile.objects.create(
+        
+        # Profile banate waqt Google ki photo daal di
+        UserProfile.objects.create(
             user=user,
-            profile_picture='default/defaultprofile.jpg'
+            profile_picture=profile_picture_url if profile_picture_url else 'default/defaultprofile.jpg'
         )
 
-    # Ensure user is always active for OAuth login (both new and existing users)
+    # Ensure user is active
     user.is_active = True
     user.save()
 
     auth.login(request, user)
-    messages.success(request, "Logged in with Google")
+    messages.success(request, "Logged in successfully with Google")
     return redirect('dashboard')
 
 

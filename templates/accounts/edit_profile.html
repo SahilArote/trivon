@@ -248,10 +248,10 @@ html, body { background-color: var(--m-bg); font-family: 'Assistant', sans-serif
                 {% csrf_token %}
 
                 <div class="avatar-upload-section">
-                    {% if userprofile.profile_picture %}
-                        <img src="{{ userprofile.profile_picture.url }}" class="avatar-preview" id="profile-img-preview">
+                    {% if 'http' in userprofile.profile_picture.name %}
+                        <img src="{{ userprofile.profile_picture.name }}" alt="User Profile" width="50" height="50" style="border-radius: 50%;">
                     {% else %}
-                        <img src="/static/images/default-user.png" class="avatar-preview" id="profile-img-preview">
+                        <img src="{{ userprofile.profile_picture.url }}" alt="User Profile" width="50" height="50" style="border-radius: 50%;">
                     {% endif %}
                     <div class="photo-input-wrapper">
                         <label class="btn-upload-label" for="id_profile_picture">Change Photo</label>
