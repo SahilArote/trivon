@@ -523,8 +523,8 @@
                                 Qty: <strong>{{ cart_item.quantity }}</strong>
                             </div>
                             <div class="product-price-row">
-                                <span class="product-subtotal">$ {{ cart_item.sub_total }}</span>
-                                <span class="product-price-each">($ {{ cart_item.product.price }} each)</span>
+                                <span class="product-subtotal">₹ {{ cart_item.sub_total }}</span>
+                                <span class="product-price-each">(₹ {{ cart_item.product.price }} each)</span>
                             </div>
                         </div>
                     </div>
@@ -540,11 +540,11 @@
                 
                 <div class="price-row">
                     <span>Total MRP</span>
-                    <span>${{ totel }}</span>
+                    <span>₹{{ totel }}</span>
                 </div>
                 <div class="price-row">
                     <span>Tax</span>
-                    <span>${{ tax }}</span>
+                    <span>₹{{ tax }}</span>
                 </div>
                 <div class="price-row free-shipping">
                     <span>Shipping</span>
@@ -553,7 +553,7 @@
 
                 <div class="price-row total-row">
                     <span>Grand Total</span>
-                    <span>${{ grand_totel }}</span>
+                    <span>₹{{ grand_totel }}</span>
                 </div>
 
                 <div class="delivery-badge">
@@ -561,9 +561,15 @@
                     <span>Free & Fast Delivery</span>
                 </div>
 
-                <div class="paypal-wrapper">
-                    <div id="paypal-button-container"></div>
-                </div>
+                
+                <button id="rzp-button1" class="btn w-100 font-weight-bold mt-3" style="background-color: #ff3f6c; color: white; padding: 12px 0; font-size: 16px; border-radius: 4px; border: none;">
+                    <i class="fa fa-lock"></i> Pay securely with Razorpay
+                </button>
+
+                <form style="display: none;">
+                    {% csrf_token %}
+                </form>
+
 
                 <div class="trust-badges">
                     <div class="trust-badge-item">
@@ -575,97 +581,89 @@
                         <span>100% Buyer Protection</span>
                     </div>
                 </div>
-
+                
             </div>
         </div>
-
+        
     </div>
 </div>
 
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
 <script>
-    function getCookie(name) {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                const cookie = cookies[i].trim();
-                // Does this cookie string begin with the name we want?
-                if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
-            }
+    var url = "{% url 'payments' %}";
+    var order_complete_url = "{% url 'order_complete' %}";
+    
+    // Sahi tareeka CSRF token nikalne ka
+    var csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+    var options = {
+        "key": "{{ razorpay_key_id }}", 
+        "amount": "{{ razorpay_amount }}", 
+        "currency": "INR",
+        "name": "Trivon",
+        "description": "Thank you for shopping with us!",
+        "order_id": "{{ razorpay_order_id }}", 
+        "handler": function (response){
+            sendData(response);
+        },
+        "prefill": {
+            "name": "{{ order.full_name }}",
+            "email": "{{ order.email }}",
+            "contact": "{{ order.phone }}"
+        },
+        "theme": {
+            "color": "#282c3f"
         }
-        return cookieValue;
+    };
+
+    var rzp1 = new Razorpay(options);
+
+    document.getElementById('rzp-button1').onclick = function(e){
+        rzp1.open();
+        e.preventDefault();
     }
-    
-    var amount ="{{ grand_totel }}"
-    var url = "{% url 'payments' %}"
-    const csrftoken = getCookie('csrftoken');
-    var orderID ="{{order.order_number}}"
-    var payment_method = 'PayPal'
-    var redirect_url = "{% url 'order_complete' %}"
-    
-    paypal.Buttons({
 
-        style: {
-            color: 'blue',
-            shape: 'rect',
-            label: 'pay',
-            height: 40
-        },
+    function sendData(razorpay_response) {
+        // Payment process hone tak button ka text change kar do
+        document.getElementById('rzp-button1').innerHTML = '<i class="fa fa-spinner fa-spin"></i> Processing...';
+        document.getElementById('rzp-button1').disabled = true;
 
-        // Set up the transaction
-        createOrder: function(data, actions) {
-            return actions.order.create({
-                purchase_units: [{
-                    amount: {
-                        value: amount,
-                    }
-                }]
-            });
-        },
-
-        // Finalize the transaction
-        onApprove: function(data, actions) {
-            return actions.order.capture().then(function(details) {
-                
-                // 1. Show the full-screen premium overlay immediately
-                document.getElementById('paymentProcessingOverlay').classList.add('active');
-                
-                // 2. Prevent the user from refreshing or leaving the page
-                window.onbeforeunload = function() {
-                    return "Your payment is being processed. Are you sure you want to leave?";
-                };
-
-                // Show a success message to the buyer
-                console.log(details);
-                sendData();
-                
-                function sendData(){
-                    fetch(url, {
-                        method : "POST",
-                        headers: {
-                            "Content-type": "application/json",
-                            "X-CSRFToken": csrftoken,
-                        },
-                        body: JSON.stringify({
-                            orderID: orderID,
-                            transID: details.id,
-                            payment_method: payment_method,
-                            status: details.status,
-                        }),
-                    })
-                    .then((response) => response.json())
-                    .then((data) => {
-                        // 3. Remove the navigation lock right before redirecting
-                        window.onbeforeunload = null;
-                        window.location.href = redirect_url + '?order_number='+data.order_number+'&payment_id='+data.transID;
-                    });
-                }
-            });
-        }
-
-    }).render('#paypal-button-container');
+        fetch(url, {
+            method: "POST",
+            headers: {
+                "Content-type": "application/json",
+                "X-CSRFToken": csrfToken,
+            },
+            body: JSON.stringify({
+                orderID: "{{ order.order_number }}",
+                transID: razorpay_response.razorpay_payment_id,
+                razorpay_order_id: razorpay_response.razorpay_order_id,
+                razorpay_signature: razorpay_response.razorpay_signature,
+                payment_method: "Razorpay",
+                status: "COMPLETED",
+            }),
+        })
+        .then((response) => response.json())
+        .then((data) => {
+            if (data.error) {
+                alert("Payment Verification Failed: " + data.error);
+                document.getElementById('rzp-button1').innerHTML = 'Try Again';
+                document.getElementById('rzp-button1').disabled = false;
+            } else {
+                // Success! Redirecting to Complete Page
+                window.location.href = order_complete_url + "?order_number=" + data.order_number + "&payment_id=" + data.transID;
+            }
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+            alert("Something went wrong with the server. Please check Render logs.");
+        });
+    }
 </script>
+
+
 {% endblock %}

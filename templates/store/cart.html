@@ -648,8 +648,8 @@
                         {% endif %}
                         
                         <div class="product-price">
-                            ${{ cart_item.sub_total }}
-                            <span class="product-price-each">(${{ cart_item.product.price }} each)</span>
+                            ₹{{ cart_item.sub_total }}
+                            <span class="product-price-each">(₹{{ cart_item.product.price }} each)</span>
                         </div>
                         
                         <div style="font-size: 12px; color: var(--success-green); margin-top: 8px; font-weight: 600;">
@@ -695,12 +695,12 @@
                 
                 <div class="summary-row">
                     <span>Total MRP</span>
-                    <span>${{ totel }}</span>
+                    <span>₹{{ totel }}</span>
                 </div>
                 
                 <div class="summary-row">
                     <span>Tax</span>
-                    <span>${{ tax }}</span>
+                    <span>₹{{ tax }}</span>
                 </div>
                 
                 <div class="summary-row" style="color: var(--success-green);">
@@ -710,7 +710,7 @@
 
                 <div class="summary-row total-row">
                     <span>Total Amount</span>
-                    <span>${{ grand_totel }}</span>
+                    <span>₹{{ grand_totel }}</span>
                 </div>
             </div>
 
@@ -738,7 +738,7 @@
     <div class="mobile-sticky-checkout">
         <div class="mobile-total-wrap">
             <span class="mobile-total-label">Total Amount</span>
-            <span class="mobile-total-price">${{ grand_totel }}</span>
+            <span class="mobile-total-price">₹{{ grand_totel }}</span>
         </div>
         <a href="{% url 'checkout' %}" class="btn-primary-pink">Checkout</a>
     </div>

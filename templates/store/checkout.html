@@ -690,7 +690,7 @@
                 <div class="mobile-summary-toggle" id="summaryToggle">
                     <span>🛒 Show Order Summary</span>
                     <span style="display: flex; align-items: center; gap: 8px;">
-                        ${{ grand_totel }}
+                        ₹{{ grand_totel }}
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
                     </span>
                 </div>
@@ -713,8 +713,8 @@
                                     Qty: {{ cart_item.quantity }}
                                 </div>
                                 <div class="cart-item-price-row">
-                                    <span class="cart-item-price">$ {{ cart_item.sub_total }}</span>
-                                    <span class="cart-item-price-each">($ {{ cart_item.product.price }} each)</span>
+                                    <span class="cart-item-price">₹ {{ cart_item.sub_total }}</span>
+                                    <span class="cart-item-price-each">(₹ {{ cart_item.product.price }} each)</span>
                                 </div>
                             </div>
                         </div>
@@ -723,11 +723,11 @@
 
                     <div class="price-row">
                         <span>Total MRP</span>
-                        <span>$ {{ totel }}</span>
+                        <span>₹ {{ totel }}</span>
                     </div>
                     <div class="price-row">
                         <span>Tax</span>
-                        <span>$ {{ tax }}</span>
+                        <span>₹ {{ tax }}</span>
                     </div>
                     <div class="price-row" style="color: var(--success-green);">
                         <span>Shipping</span>
@@ -736,7 +736,7 @@
                     
                     <div class="price-row total">
                         <span>Grand Total</span>
-                        <span>$ {{ grand_totel }}</span>
+                        <span>₹ {{ grand_totel }}</span>
                     </div>
 
                     <div class="delivery-estimate">
@@ -767,7 +767,7 @@
         <div class="mobile-sticky-bar">
             <div class="mobile-total-wrap">
                 <span class="mobile-total-label">Grand Total</span>
-                <span class="mobile-total-amount">$ {{ grand_totel }}</span>
+                <span class="mobile-total-amount">₹ {{ grand_totel }}</span>
             </div>
             <button type="button" class="btn-pink js-trigger-modal">Proceed to Payment</button>
         </div>

@@ -225,7 +225,7 @@ def checkout(request , totel=0 , quantity=0 , cart_items=None):
         'totel': totel,
         'quantity': quantity,
         'cart_items': cart_items,
-        'tex': tax,
+        'tax': tax,
         'grand_totel': grand_totel,
     }
 

@@ -1,8 +1,8 @@
-from django.shortcuts import render , redirect
-from django.http import HttpResponse , JsonResponse
+from django.shortcuts import render, redirect
+from django.http import HttpResponse, JsonResponse
 from carts.models import CartItem
 from .forms import OrderForm
-from .models import Order , Payment, OrderProduct
+from .models import Order, Payment, OrderProduct
 from store.models import Product 
 from django.core.mail import EmailMessage
 from django.template.loader import render_to_string
@@ -10,11 +10,11 @@ import datetime
 import json
 from .services.shiprocket import create_shiprocket_order
 
+# Razorpay aur Settings import karna zaroori hai
+import razorpay
+from django.conf import settings
 
 # Create your views here.
-
-
-
 
 def payments(request):
     body = json.loads(request.body)
@@ -25,13 +25,29 @@ def payments(request):
         order_number=body['orderID']
     )
 
+    # ----------------------------------------
+    # RAZORPAY SIGNATURE VERIFICATION (Security)
+    # ----------------------------------------
+    client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
+    
+    try:
+        # Check kar rahe hain ki payment sach mein Razorpay se aayi hai ya nahi
+        client.utility.verify_payment_signature({
+            'razorpay_order_id': body['razorpay_order_id'],
+            'razorpay_payment_id': body['transID'],
+            'razorpay_signature': body['razorpay_signature']
+        })
+    except razorpay.errors.SignatureVerificationError:
+        return JsonResponse({'error': 'Invalid Payment Signature'}, status=400)
+
+
     # Store payment details
     payment = Payment(
         user=request.user,
         payment_id=body['transID'],
-        payment_method=body['payment_method'],
+        payment_method='Razorpay',  # Hardcode kar diya Razorpay
         amount_paid=order.order_total,
-        status=body['status'],
+        status='COMPLETED',
     )
     payment.save()
 
@@ -64,8 +80,8 @@ def payments(request):
     CartItem.objects.filter(user=request.user).delete()
 
     # 🚚 SHIPROCKET INTEGRATION START
-    if body['status'] == "COMPLETED":   # change if your success value is different
-        print("Payment Status:", body['status'])
+    if payment.status == "COMPLETED":   
+        print("Payment Status:", payment.status)
 
         response = create_shiprocket_order(order)
         print("Shiprocket Response:", response)
@@ -74,7 +90,6 @@ def payments(request):
             order.shiprocket_shipment_id = response.get("shipment_id")
             order.shiprocket_order_id = response.get("order_id")
             order.save()
-
         else:
             print("Shiprocket Error:", response)
     # 🚚 SHIPROCKET INTEGRATION END
@@ -94,15 +109,15 @@ def payments(request):
         'transID': payment.payment_id,
     })
 
-def place_order(request, totel=0 , quantity=0 ):
+
+def place_order(request, totel=0, quantity=0):
     current_user = request.user
 
-
-    #if the cart item are 0 then send him to shop
+    # if the cart item are 0 then send him to shop
     cart_items = CartItem.objects.filter(user=current_user)
     cart_count = cart_items.count()
     if cart_count <= 0:
-        return  redirect('store')
+        return redirect('store')
 
     grand_totel = 0
     tax = 0
@@ -116,7 +131,7 @@ def place_order(request, totel=0 , quantity=0 ):
     if request.method =='POST':
         form = OrderForm(request.POST)
         if form.is_valid():
-            #store all the info in db         
+            # store all the info in db         
             data = Order()
             data.user = current_user
             data.first_name = form.cleaned_data['first_name']
@@ -134,7 +149,8 @@ def place_order(request, totel=0 , quantity=0 ):
             data.tax = tax
             data.ip = request.META.get('REMOTE_ADDR')
             data.save()
-            #order number
+            
+            # order number
             yr = int(datetime.date.today().strftime('%Y'))
             dt = int(datetime.date.today().strftime('%d'))
             mt = int(datetime.date.today().strftime('%m'))
@@ -144,17 +160,35 @@ def place_order(request, totel=0 , quantity=0 ):
             data.order_number = order_number
             data.save()
 
-            order = Order.objects.get(user = current_user, is_ordered=False, order_number = order_number)
+            order = Order.objects.get(user=current_user, is_ordered=False, order_number=order_number)
+
+            # ----------------------------------------
+            # RAZORPAY ORDER CREATION
+            # ----------------------------------------
+            client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
+            razorpay_amount = int(grand_totel * 100) # Rupees ko Paise mein convert kiya
+            
+            razorpay_data = {
+                "amount": razorpay_amount,
+                "currency": "INR",
+                "receipt": order.order_number,
+            }
+            payment_response = client.order.create(data=razorpay_data)
+            razorpay_order_id = payment_response['id']
+
             context ={
                 'order': order,
-                'cart_items' : cart_items,
+                'cart_items': cart_items,
                 'totel': totel,
-                'tax' :tax,
-                'grand_totel':grand_totel,
+                'tax': tax,
+                'grand_totel': grand_totel,
+                # Frontend par Razorpay button lagane ke liye details bhej rahe hain
+                'razorpay_order_id': razorpay_order_id,
+                'razorpay_amount': razorpay_amount,
+                'razorpay_key_id': settings.RAZORPAY_KEY_ID,
             }
-            return  render(request, 'orders/payments.html', context)
+            return render(request, 'orders/payments.html', context)
         else:
-            # Return to checkout with form errors
             context = {
                 'form': form,
                 'totel': totel,
@@ -164,7 +198,6 @@ def place_order(request, totel=0 , quantity=0 ):
                 'grand_totel': grand_totel,
             }
             return render(request, 'store/checkout.html', context)
-
 
 
 def order_complete(request):
@@ -202,7 +235,3 @@ def order_complete(request):
     }
 
     return render(request, 'orders/order_complete.html', context)
-
-
-
-
