@@ -164,4 +164,34 @@ def auto_assign_awb(order):
         order.awb_code = "TEST-AWB-123456"
         order.shipment_status = "Sandbox Mode"
 
-    order.save()    
+    order.save()   
+
+    import requests
+from django.conf import settings
+
+# ... (Aapka purana create_shiprocket_order wala code) ...
+
+def get_shiprocket_token():
+    url = "https://apiv2.shiprocket.in/v1/external/auth/login"
+    payload = {
+        "email": settings.SHIPROCKET_EMAIL,
+        "password": settings.SHIPROCKET_PASSWORD
+    }
+    response = requests.post(url, json=payload)
+    if response.status_code == 200:
+        return response.json().get('token')
+    return None
+
+def track_shipment_live(shipment_id):
+    token = get_shiprocket_token()
+    if not token:
+        return None
+    
+    # Shipment ID ke through live tracking ka URL
+    url = f"https://apiv2.shiprocket.in/v1/external/courier/track/shipment/{shipment_id}"
+    headers = {"Authorization": f"Bearer {token}"}
+    
+    response = requests.get(url, headers=headers)
+    if response.status_code == 200:
+        return response.json()
+    return None 

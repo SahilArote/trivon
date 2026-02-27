@@ -101,8 +101,11 @@ def payments(request):
         'order': order,
     })
 
-    send_email = EmailMessage(mail_subject, message, to=[request.user.email])
-    send_email.send()
+    try:
+        send_email = EmailMessage(mail_subject, message, to=[request.user.email])
+        send_email.send()
+    except Exception as e:
+        print("Email sending failed, but order was placed:", e)
 
     return JsonResponse({
         'order_number': order.order_number,

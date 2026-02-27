@@ -1,3 +1,4 @@
+from orders.services.shiprocket import track_shipment_live # Apna import path check kar lena
 from django.shortcuts import render , redirect , get_object_or_404
 from .forms import RegistrationForm,  UserForm, UserProfileForm
 from .models import Account, UserProfile
@@ -392,9 +393,34 @@ def resetPassword(request):
         return render(request, 'accounts/resetPassword.html')
 
 
+
+@login_required(login_url='login')
 def track_order(request, order_number):
-    order = get_object_or_404(Order, order_number=order_number)
-    return render(request, 'accounts/track_order.html', {'order': order})
+    order = get_object_or_404(Order, order_number=order_number, user=request.user)
+    
+    current_status = "Processing" # Default status
+    tracking_activities = []
+    
+    # Agar order Shiprocket par chala gaya hai, toh live status mangwao
+    if order.shiprocket_shipment_id:
+        response = track_shipment_live(order.shiprocket_shipment_id)
+        
+        if response and response.get('tracking_data'):
+            data = response['tracking_data']
+            # Track status 1 matlab success
+            if data.get('track_status') == 1:
+                shipment_data = data.get('shipment_track', [{}])[0]
+                current_status = shipment_data.get('current_status', 'Processing')
+                
+                # Yeh array mein poori history aati hai (eg. Delhi -> Mumbai)
+                tracking_activities = data.get('shipment_track_activities', [])
+
+    context = {
+        'order': order,
+        'current_status': current_status,
+        'tracking_activities': tracking_activities,
+    }
+    return render(request, 'accounts/track_order.html', context)
 
 def order_status_api(request, order_number):
     order = get_object_or_404(Order, order_number=order_number)
