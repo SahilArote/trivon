@@ -398,27 +398,51 @@ def resetPassword(request):
 def track_order(request, order_number):
     order = get_object_or_404(Order, order_number=order_number, user=request.user)
     
-    current_status = "Processing" # Default status
+    current_status = "Processing"  # Default status jab tak courier pick na kare
     tracking_activities = []
-    
-    # Agar order Shiprocket par chala gaya hai, toh live status mangwao
+
+    # Agar order Shiprocket par push ho chuka hai (shipment_id aa gayi hai)
     if order.shiprocket_shipment_id:
+        
+        # Shiprocket ke server se LIVE data mangwana
         response = track_shipment_live(order.shiprocket_shipment_id)
         
         if response and response.get('tracking_data'):
-            data = response['tracking_data']
-            # Track status 1 matlab success
-            if data.get('track_status') == 1:
-                shipment_data = data.get('shipment_track', [{}])[0]
-                current_status = shipment_data.get('current_status', 'Processing')
+            tracking_data = response['tracking_data']
+            
+            # Agar tracking active hai (track_status == 1)
+            if tracking_data.get('track_status') == 1:
                 
-                # Yeh array mein poori history aati hai (eg. Delhi -> Mumbai)
-                tracking_activities = data.get('shipment_track_activities', [])
+                # 1. LIVE CURRENT STATUS NIKALNA
+                shipment_track = tracking_data.get('shipment_track', [])
+                if shipment_track:
+                    raw_status = shipment_track[0].get('current_status', 'Processing').upper()
+                    
+                    # Shiprocket ke alag-alag status ko apne progress bar se match karna
+                    if raw_status in ['IN TRANSIT', 'SHIPPED', 'PICKED UP']:
+                        current_status = 'SHIPPED'
+                    elif raw_status == 'OUT FOR DELIVERY':
+                        current_status = 'OUT FOR DELIVERY'
+                    elif raw_status == 'DELIVERED':
+                        current_status = 'DELIVERED'
+                    else:
+                        current_status = raw_status
+
+                # 2. LIVE HISTORY NIKALNA (Date, Activity, Location)
+                raw_activities = tracking_data.get('shipment_track_activities', [])
+                
+                # Shiprocket ki list ko apne HTML wale format mein convert karna
+                for act in raw_activities:
+                    tracking_activities.append({
+                        'date': act.get('date', ''),
+                        'activity': act.get('activity', 'Status Updated'),
+                        'location': act.get('location', 'In Transit')
+                    })
 
     context = {
         'order': order,
         'current_status': current_status,
-        'tracking_activities': tracking_activities,
+        'tracking_activities': tracking_activities, # Yeh direct HTML loop mein jayega
     }
     return render(request, 'accounts/track_order.html', context)
 

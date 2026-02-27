@@ -8,7 +8,7 @@ from django.core.mail import EmailMessage
 from django.template.loader import render_to_string
 import datetime 
 import json
-from .services.shiprocket import create_shiprocket_order
+from .services.shiprocket import create_shiprocket_order , auto_assign_awb
 
 # Razorpay aur Settings import karna zaroori hai
 import razorpay
@@ -83,15 +83,22 @@ def payments(request):
     if payment.status == "COMPLETED":   
         print("Payment Status:", payment.status)
 
+        # 1. Pehle Shiprocket par order create karo
         response = create_shiprocket_order(order)
         print("Shiprocket Response:", response)
 
         if response.get("shipment_id"):
+            # Agar order ban gaya, toh ID save kar lo
             order.shiprocket_shipment_id = response.get("shipment_id")
             order.shiprocket_order_id = response.get("order_id")
             order.save()
+
+            # 2. 🚀 NAYA KAAM: Turant us order ko ek Courier (AWB) assign kar do
+            print("Assigning AWB now...")
+            auto_assign_awb(order)
+
         else:
-            print("Shiprocket Error:", response)
+            print("Shiprocket Order Creation Error:", response)
     # 🚚 SHIPROCKET INTEGRATION END
 
     # Send confirmation email

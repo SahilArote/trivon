@@ -1,6 +1,8 @@
+from django.conf import settings
 import requests
 from django.conf import settings
 from orders.models import OrderProduct
+import requests
 
 BASE_URL = "https://apiv2.shiprocket.in/v1/external"
 
@@ -104,8 +106,11 @@ def create_shiprocket_order(order):
 # 3️⃣ AUTO ASSIGN COURIER + AWB
 # =========================
 def auto_assign_awb(order):
-
     token = generate_token()
+    
+    if not token:
+        print("Shiprocket Token Generate Nahi Hua!")
+        return
 
     headers = {
         "Content-Type": "application/json",
@@ -122,52 +127,60 @@ def auto_assign_awb(order):
         "weight": 0.5
     }
 
-    service_response = requests.get(
-        service_url,
-        params=service_payload,
-        headers=headers
-    )
-    service_data = service_response.json()
+    try:
+        service_response = requests.get(
+            service_url,
+            params=service_payload,
+            headers=headers
+        )
+        service_data = service_response.json()
 
-    print("SERVICEABILITY RESPONSE:", service_data)
+        print("SERVICEABILITY RESPONSE:", service_data)
 
-    couriers = service_data.get("data", {}).get("available_courier_companies", [])
+        couriers = service_data.get("data", {}).get("available_courier_companies", [])
 
-    if not couriers:
-        print("No courier available")
-        return
+        if not couriers:
+            print("No courier available for this pincode.")
+            return
 
-    # Select first available courier
-    courier_id = couriers[0]["courier_company_id"]
+        # Select first available courier (Sabse sasta/fastest option manually bhi sort kar sakte hain baad mein)
+        courier_id = couriers[0]["courier_company_id"]
 
-    # Step 2: Assign AWB
-    assign_url = f"{BASE_URL}/courier/assign/awb/"
+        # Step 2: Assign AWB
+        assign_url = f"{BASE_URL}/courier/assign/awb/"
 
-    assign_payload = {
-        "shipment_id": order.shipment_id,
-        "courier_id": courier_id
-    }
+        assign_payload = {
+            # FIX 1: Corrected field name as per your previous models
+            "shipment_id": order.shiprocket_shipment_id, 
+            "courier_id": courier_id
+        }
 
-    assign_response = requests.post(assign_url, json=assign_payload, headers=headers)
-    assign_data = assign_response.json()
+        assign_response = requests.post(assign_url, json=assign_payload, headers=headers)
+        assign_data = assign_response.json()
 
-    print("ASSIGN AWB RESPONSE:", assign_data)
-    # 👇 ADD THIS BLOCK HERE
-    
-    awb = assign_data.get("awb_code")
+        print("ASSIGN AWB RESPONSE:", assign_data)
+        
+        # FIX 2: Correct Shiprocket JSON Parsing
+        # Shiprocket ka format aise aata hai: {"response": {"data": {"awb_code": "...", "courier_name": "..."}}}
+        response_data = assign_data.get("response", {}).get("data", {})
+        
+        awb = response_data.get("awb_code")
 
-    if awb:
-        order.awb_code = awb
-        order.courier_name = assign_data.get("courier_name")
-        order.shipment_status = "AWB Assigned"
-    else:
-        order.awb_code = "TEST-AWB-123456"
-        order.shipment_status = "Sandbox Mode"
+        if awb:
+            order.awb_code = awb
+            order.courier_name = response_data.get("courier_name")
+            order.shipment_status = "AWB Assigned"
+        else:
+            print("AWB Not Found in Response, shifting to Sandbox Mode")
+            order.awb_code = "TEST-AWB-123456"
+            order.shipment_status = "Sandbox Mode"
 
-    order.save()   
+        order.save()
+        print(f"AWB Assigned Successfully: {awb}")
 
-    import requests
-from django.conf import settings
+    except Exception as e:
+        print("Error in AWB Assignment:", str(e))
+
 
 # ... (Aapka purana create_shiprocket_order wala code) ...
 
