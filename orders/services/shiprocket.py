@@ -11,16 +11,20 @@ BASE_URL = "https://apiv2.shiprocket.in/v1/external"
 # 1️⃣ GENERATE TOKEN
 # =========================
 def generate_token():
-    url = f"{BASE_URL}/auth/login"
-
+    url = "https://apiv2.shiprocket.in/v1/external/auth/login"
     payload = {
         "email": settings.SHIPROCKET_EMAIL,
         "password": settings.SHIPROCKET_PASSWORD
     }
-
     response = requests.post(url, json=payload)
-    return response.json().get("token")
+    
+    # 👇 YEH 2 NAYI LINES ADD KAREIN DEBUGGING KE LIYE 👇
+    print("SHIPROCKET LOGIN STATUS:", response.status_code)
+    print("SHIPROCKET LOGIN RESPONSE:", response.text)
 
+    if response.status_code == 200:
+        return response.json().get('token')
+    return None
 
 # =========================
 # 2️⃣ CREATE ORDER
