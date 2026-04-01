@@ -21,6 +21,7 @@ from urllib.parse import urlencode
 
 
 
+
 def register(request):
     if request.method == 'POST':
         form =  RegistrationForm(request.POST)
