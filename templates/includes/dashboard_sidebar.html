@@ -1,40 +1,89 @@
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-
 <style>
-/* ================= MYNTRA-STYLE SIDEBAR & MOBILE NAV ================= */
+/* ================= SIDEBAR & MOBILE NAV CSS (MOBILE-FIRST) ================= */
 :root {
     --m-pink: #ff3f6c;
     --m-dark: #282c3f;
     --m-gray: #94969f;
+    --m-bg: #f5f5f6;
     --m-border: #eaeaec;
+    --sidebar-width: 260px;
 }
 
-/* Mobile Header Fix */
-.mobile-account-nav {
-    display: none;
+/* --- Mobile Navigation Header --- */
+.mobile-top-nav {
+    display: flex;
     padding: 15px 20px;
     background: #fff;
     border-bottom: 1px solid var(--m-border);
-    position: fixed;
-    top: 0;
-    z-index: 100;
     justify-content: space-between;
     align-items: center;
+    position: fixed;
+    top: 65px;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    width: 100%;
 }
 
+.mobile-top-nav span {
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--m-dark);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.menu-trigger {
+    background: none;
+    border: none;
+    font-size: 14px;
+    color: var(--m-pink);
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* --- Off-Canvas Sidebar (Mobile Default) --- */
 .dashboard-sidebar {
-    width: 260px;
+    position: fixed;
+    top: 0;
+    left: -280px;
+    width: 280px;
+    height: 100vh;
     background: #fff;
-    border-right: 1px solid var(--m-border);
+    z-index: 1050;
+    transition: left 0.3s ease;
+    box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+    overflow-y: auto;
 }
 
+.dashboard-sidebar.open {
+    left: 0;
+}
+
+.sidebar-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(40, 44, 63, 0.7);
+    z-index: 1040;
+    backdrop-filter: blur(2px);
+}
+
+.sidebar-overlay.show {
+    display: block;
+}
+
+/* --- Sidebar Content Styling --- */
 .sidebar-heading {
     padding: 20px;
-    border-bottom: 1px solid var(--m-border);
     font-size: 12px;
     font-weight: 700;
     color: var(--m-gray);
     text-transform: uppercase;
+    border-bottom: 1px solid var(--m-border);
     letter-spacing: 1px;
 }
 
@@ -47,18 +96,19 @@
 .dashboard-menu a {
     display: flex;
     align-items: center;
-    padding: 12px 20px;
+    padding: 14px 20px;
     color: var(--m-dark);
     text-decoration: none;
     font-size: 14px;
+    transition: background 0.2s, color 0.2s;
     border-left: 3px solid transparent;
-    transition: 0.2s;
 }
 
 .dashboard-menu a i {
     margin-right: 15px;
-    width: 20px;
+    width: 18px;
     color: #686b78;
+    text-align: center;
 }
 
 .dashboard-menu a:hover {
@@ -67,22 +117,26 @@
 }
 
 .dashboard-menu a.active {
-    background: #f5f5f6;
     color: var(--m-pink);
-    font-weight: 700;
+    background: #f5f5f6;
     border-left-color: var(--m-pink);
+    font-weight: 700;
 }
 
-.dashboard-menu a.active i { color: var(--m-pink); }
+.dashboard-menu a.active i {
+    color: var(--m-pink);
+}
 
 .logout-box {
     padding: 20px;
     border-top: 1px solid var(--m-border);
+    margin-top: 10px;
 }
 
 .logout-btn {
     display: block;
-    padding: 10px;
+    width: 100%;
+    padding: 12px;
     text-align: center;
     color: var(--m-dark);
     border: 1px solid var(--m-border);
@@ -90,53 +144,57 @@
     font-size: 12px;
     font-weight: 700;
     border-radius: 4px;
+    transition: 0.2s;
 }
 
-/* ================= MOBILE SYSTEM FIXES ================= */
-@media (max-width: 768px) {
-    .mobile-account-nav { display: flex; }
+.logout-btn:hover {
+    background: var(--m-pink);
+    color: #fff;
+    border-color: var(--m-pink);
+}
 
+/* ================= DESKTOP (min-width: 768px) ================= */
+@media (min-width: 768px) {
+    /* Hide mobile nav header on desktop */
+    .mobile-top-nav { 
+        display: none; 
+    }
+    
+    /* Hide overlay on desktop */
+    .sidebar-overlay { display: none !important; }
+
+    /* Change sidebar from off-canvas to locked grid column */
     .dashboard-sidebar {
-        position: fixed;
-        top: 0;
-        left: -100%; /* Fully hidden */
-        height: 100vh;
-        width: 280px;
-        z-index: 9999; /* Higher than everything */
-        transition: transform 0.3s ease;
-        visibility: hidden;
-        border-right: none;
+        position: sticky;
+        top: 20px; /* Lock it 20px from top during scroll */
+        left: 0;
+        width: var(--sidebar-width);
+        height: fit-content;
+        box-shadow: none;
+        border: 1px solid var(--m-border);
+        border-radius: 4px;
+        z-index: 10;
+        overflow-y: visible;
+        transition: none;
     }
-
-    .dashboard-sidebar.open {
-        transform: translateX(145%);
-        visibility: visible;
-    }
-
-    .sidebar-overlay {
-        display: none;
-        position: fixed;
-        inset: 0;
-        background: rgba(40, 44, 63, 0.8);
-        z-index: 9998; /* Just below sidebar */
-        backdrop-filter: blur(4px);
-    }
-
-    .sidebar-overlay.show { display: block; }
 }
 </style>
 
-<div class="mobile-account-nav">
-    <span style="font-weight: 700; font-size: 16px;">MY ACCOUNT</span>
-    <button onclick="toggleSidebar()" style="background:none; border:none; font-size:20px;">
-        <i class="fa fa-bars"></i>
+<!-- Mobile Sticky Nav -->
+<div class="mobile-top-nav">
+    <span>MY ACCOUNT</span>
+    <button class="menu-trigger" onclick="toggleSidebar()">
+        <i class="fa fa-bars"></i> MENU
     </button>
 </div>
 
+<!-- Mobile Sidebar Overlay -->
 <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
 
+<!-- The Sidebar Details -->
 <aside class="dashboard-sidebar" id="dashboardSidebar">
     <div class="sidebar-heading">Account Overview</div>
+    
     <nav class="dashboard-menu">
         <a href="{% url 'dashboard' %}" class="{% if '/dashboard/' in request.path %}active{% endif %}">
             <i class="fa fa-th-large"></i> Overview
@@ -151,16 +209,27 @@
             <i class="fa fa-lock"></i> Change Password
         </a>
     </nav>
+    
     <div class="logout-box">
         <a href="{% url 'logout' %}" class="logout-btn">LOG OUT</a>
     </div>
 </aside>
 
+<!-- Logic for Mobile Sidebar Toggle -->
 <script>
 function toggleSidebar() {
     const sidebar = document.getElementById('dashboardSidebar');
     const overlay = document.getElementById('sidebarOverlay');
+    
+    // Toggle classes
     sidebar.classList.toggle('open');
     overlay.classList.toggle('show');
+    
+    // Lock body scroll when sidebar is open on mobile
+    if (sidebar.classList.contains('open')) {
+        document.body.style.overflow = 'hidden';
+    } else {
+        document.body.style.overflow = 'auto';
+    }
 }
 </script>

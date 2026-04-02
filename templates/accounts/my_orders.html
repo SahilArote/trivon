@@ -4,6 +4,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
 <style>
+/* ================= GLOBAL & MOBILE-FIRST CSS ================= */
 :root {
     --m-pink: #ff3f6c;
     --m-dark: #282c3f;
@@ -11,230 +12,169 @@
     --m-bg: #f5f5f6;
     --m-border: #eaeaec;
     --m-success: #03a685;
-    --sidebar-width: 280px;
 }
 
-/* Force the background to cover the whole screen */
-html, body { background-color: var(--m-bg); margin: 0; padding: 0; width: 100%; overflow-x: hidden; }
+body { background-color: var(--m-bg); }
 
-/* ================= MOBILE HEADER ================= */
-.mobile-top-nav {
-    display: none; /* Hidden on desktop */
-    padding: 14px 20px;
-    background: #fff;
-    border-bottom: 1px solid var(--m-border);
-    justify-content: space-between;
-    align-items: center;
-    position: sticky;
-    top: 0;
-    z-index: 1000;
+.orders-wrapper {
+    min-height: 80vh;
+    padding-top: 65px;
 }
 
-.mobile-top-nav span { 
-    font-weight: 700; 
-    font-size: 12px; 
-    color: var(--m-dark); 
-    text-transform: uppercase; 
-    letter-spacing: 0.5px; 
-}
-
-.menu-trigger { 
-    background: none; 
-    border: none; 
-    font-size: 14px; 
-    color: var(--m-pink); 
-    font-weight: 700; 
-    display: flex; 
-    align-items: center; 
-    gap: 6px; 
-    cursor: pointer; 
-}
-
-/* ================= LAYOUT ================= */
-.orders-wrapper { width: 100%; min-height: 100vh; }
-
-.orders-container {
-    max-width: 1200px;
+.central-container {
+    width: 100%;
     margin: 0 auto;
     display: flex;
-    gap: 30px;
-    padding: 40px 20px;
+    flex-direction: column;
+    gap: 20px;
+    padding: 0 15px 40px;
 }
 
-/* ================= SIDEBAR ================= */
-.sidebar-overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(40, 44, 63, 0.8);
-    z-index: 9998;
-    backdrop-filter: blur(2px);
-}
-
-.dashboard-sidebar {
-    width: var(--sidebar-width);
-    flex-shrink: 0;
-    background: #fff;
-    border: 1px solid var(--m-border);
-    height: fit-content;
-    position: sticky;
-    top: 20px;
-}
-
-.sidebar-heading {
-    padding: 20px;
-    font-size: 11px;
-    font-weight: 700;
-    color: var(--m-gray);
-    text-transform: uppercase;
-    border-bottom: 1px solid var(--m-border);
-}
-
-.dashboard-menu a {
-    display: flex;
-    align-items: center;
-    padding: 14px 20px;
-    color: var(--m-dark);
-    text-decoration: none;
-    font-size: 14px;
-}
-
-.dashboard-menu a i { margin-right: 15px; width: 18px; color: #686b78; }
-.dashboard-menu a.active { color: var(--m-pink); background: #f5f5f6; border-left: 3px solid var(--m-pink); font-weight: 700; }
-
-/* ================= ORDER CARDS ================= */
 .orders-main { flex: 1; }
 
-.page-title { font-size: 22px; font-weight: 700; color: var(--m-dark); margin-bottom: 25px; }
+.page-title {
+    display: block; 
+    font-size: 20px; 
+    font-weight: 700; 
+    color: var(--m-dark); 
+    margin-bottom: 20px;
+    text-transform: uppercase;
+}
 
 .order-item-card {
     background: #fff;
     border: 1px solid var(--m-border);
     margin-bottom: 16px;
     border-radius: 4px;
+    overflow: hidden;
 }
 
 .order-header {
-    padding: 12px 20px;
-    background: #fdfdfd;
+    padding: 12px 15px;
+    background: #fcfcfc;
     display: flex;
     justify-content: space-between;
+    align-items: center;
     border-bottom: 1px solid var(--m-border);
 }
 
-.status-badge { color: var(--m-success); font-weight: 700; font-size: 12px; display: flex; align-items: center; gap: 6px; }
-.date-label { color: var(--m-gray); font-size: 12px; }
+.status-badge {
+    color: var(--m-success);
+    font-weight: 700;
+    font-size: 11px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
 
-.order-body { padding: 20px; display: flex; justify-content: space-between; align-items: center; }
+.date-label { color: var(--m-gray); font-size: 11px; }
 
-.order-title { font-weight: 700; color: var(--m-dark); font-size: 15px; display: block; margin-bottom: 5px; }
-.order-meta-text { font-size: 13px; color: var(--m-gray); line-height: 1.5; }
+.order-body {
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.order-title {
+    font-weight: 700;
+    color: var(--m-dark);
+    font-size: 14px;
+    margin-bottom: 4px;
+    display: block;
+}
+
+.order-meta-text {
+    font-size: 13px;
+    color: var(--m-gray);
+    line-height: 1.4;
+}
 
 .view-btn {
     border: 1px solid var(--m-pink);
     color: var(--m-pink);
-    padding: 8px 20px;
+    padding: 10px;
     text-decoration: none;
     font-weight: 700;
-    font-size: 12px;
+    font-size: 11px;
     text-transform: uppercase;
     border-radius: 2px;
+    text-align: center;
+    transition: background 0.2s;
 }
 
-/* ================= MOBILE UI FIXES ================= */
-@media (max-width: 768px) {
-    .mobile-top-nav { display: flex; }
-    
-    /* HIDE THE REDUNDANT TITLE ON MOBILE */
-    .page-title { display: none !important; } 
+.view-btn:hover { background: var(--m-pink); color: #fff; }
 
-    .orders-container { flex-direction: column; padding: 15px; gap: 0; }
+/* ================= DESKTOP (min-width: 768px) ================= */
+@media (min-width: 768px) {
+    .orders-wrapper { padding-top: 30px; }
     
-    .dashboard-sidebar {
-        position: fixed;
-        top: 0;
-        left: -100%;
-        height: 100vh;
-        z-index: 9999;
-        transition: 0.3s ease;
-        border: none;
+    .central-container {
+        max-width: 1200px;
+        flex-direction: row;
+        padding: 0 20px 40px;
+        gap: 40px;
     }
 
-    .dashboard-sidebar.open { left: 0; width: 280px; }
-    .sidebar-overlay.show { display: block; }
+    .page-title { font-size: 22px; margin-bottom: 25px; }
+    
+    .order-header { padding: 12px 20px; }
+    .status-badge { font-size: 12px; }
+    .date-label { font-size: 12px; }
 
-    .order-body { flex-direction: column; align-items: flex-start; gap: 15px; }
-    .view-btn { width: 100%; text-align: center; padding: 12px; }
+    .order-body {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px;
+    }
+
+    .order-title { font-size: 15px; }
+    .view-btn { padding: 8px 20px; width: auto; }
 }
 </style>
 
 <div class="orders-wrapper">
-    <div class="mobile-top-nav">
-        <span>MY ORDERS</span>
-        <button class="menu-trigger" onclick="toggleSidebar()">
-            <i class="fa fa-bars"></i> MENU
-        </button>
-    </div>
+    <div class="central-container">
+        
+        <!-- Reusable Sidebar -->
+        {% include 'includes/dashboard_sidebar.html' %}
 
-    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
-
-    <div class="orders-container">
-        <aside class="dashboard-sidebar" id="dashboardSidebar">
-            <div class="sidebar-heading">Account</div>
-            <nav class="dashboard-menu">
-                <a href="{% url 'dashboard' %}" class="{% if '/dashboard/' in request.path %}active{% endif %}">
-                    <i class="fa fa-th-large"></i> Overview
-                </a>
-                <a href="{% url 'my_orders' %}" class="{% if '/my_orders/' in request.path %}active{% endif %}">
-                    <i class="fa fa-shopping-bag"></i> Orders
-                </a>
-                <a href="{% url 'edit_profile' %}" class="{% if '/edit_profile/' in request.path %}active{% endif %}">
-                    <i class="fa fa-user"></i> Profile Details
-                </a>
-                <a href="{% url 'change_password' %}" class="{% if '/change_password/' in request.path %}active{% endif %}">
-                    <i class="fa fa-lock"></i> Change Password
-                </a>
-            </nav>
-        </aside>
-
+        <!-- Main Content -->
         <main class="orders-main">
             <h2 class="page-title">My Orders</h2>
-
-            {% for order in orders %}
-            <div class="order-item-card">
-                <div class="order-header">
-                    <div class="status-badge"><i class="fa fa-check-circle"></i> PLACED</div>
-                    <div class="date-label">On {{ order.created_at|date:"d M Y" }}</div>
-                </div>
-                <div class="order-body">
-                    <div>
-                        <span class="order-title">Order #{{ order.order_number }}</span>
-                        <div class="order-meta-text">
-                            Receiver: {{ order.full_name }}<br>
-                            Total: <strong>₹{{ order.order_total }}</strong>
+            
+            {% if orders %}
+                {% for order in orders %}
+                <div class="order-item-card">
+                    <div class="order-header">
+                        <span class="date-label">Placed on {{ order.created_at|date:"d M Y" }}</span>
+                        <div class="status-badge">
+                            <i class="fa fa-truck"></i> {{ order.status }}
                         </div>
                     </div>
-                    <a href="{% url 'order_detail' order.order_number %}" class="view-btn">View Details</a>
-                    <a href="{% url 'track_order' order.order_number %}" class="btn btn-primary">Track Your Order</a>
+                    <div class="order-body">
+                        <div>
+                            <span class="order-title">Order #{{ order.order_number }}</span>
+                            <div class="order-meta-text">
+                                Total: ${{ order.order_total }} <br>
+                                Items: {{ order.orderproduct_set.count }} 
+                            </div>
+                        </div>
+                        <a href="{% url 'order_detail' order.order_number %}" class="view-btn">View Details</a>
+                    </div>
                 </div>
-            </div>
-            {% empty %}
-            <div style="background:#fff; padding: 40px; text-align: center; border: 1px solid var(--m-border);">
-                <p style="color: var(--m-gray);">No orders found.</p>
-                <a href="{% url 'store' %}" style="color: var(--m-pink); font-weight: 700; text-decoration: none;">Go Shopping</a>
-            </div>
-            {% endfor %}
+                {% endfor %}
+            {% else %}
+                <div style="padding: 40px; text-align: center; background: #fff; border: 1px solid var(--m-border); border-radius: 4px;">
+                    <i class="fa fa-shopping-basket" style="font-size: 40px; color: var(--m-gray); margin-bottom: 15px; display: block;"></i>
+                    <h3 style="font-size: 16px; color: var(--m-dark);">You haven't placed any orders yet.</h3>
+                    <a href="{% url 'store' %}" class="view-btn" style="margin-top: 15px; display: inline-block;">Start Shopping</a>
+                </div>
+            {% endif %}
+            
         </main>
     </div>
 </div>
-
-<script>
-function toggleSidebar() {
-    const sidebar = document.getElementById('dashboardSidebar');
-    const overlay = document.getElementById('sidebarOverlay');
-    sidebar.classList.toggle('open');
-    overlay.classList.toggle('show');
-}
-</script>
 
 {% endblock %}

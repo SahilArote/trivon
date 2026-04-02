@@ -4,115 +4,70 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
 <style>
+/* ================= GLOBAL & MOBILE-FIRST CSS ================= */
 :root {
     --m-pink: #ff3f6c;
     --m-dark: #282c3f;
     --m-gray: #94969f;
+    --m-bg: #f5f5f6;
     --m-border: #eaeaec;
-    --sidebar-width: 260px;
 }
 
-/* ================= LAYOUT ================= */
+body { background-color: var(--m-bg); }
+
 .dashboard-wrapper {
-    background: #fff;
     min-height: 80vh;
-    padding-top: 20px;
+    padding-top: 65px;
 }
 
 .central-container {
-    max-width: 1200px;
+    width: 100%;
     margin: 0 auto;
-    display: flex; /* Using flex for better control */
-    gap: 40px;
-    padding: 0 20px 40px;
-}
-
-/* ================= SIDEBAR (LOCKED) ================= */
-.dashboard-sidebar {
-    width: var(--sidebar-width);
-    flex-shrink: 0;
-    border-right: 1px solid var(--m-border);
-    height: fit-content;
-    position: sticky; /* Keeps it locked while scrolling */
-    top: 20px;
-}
-
-.sidebar-heading {
-    padding: 10px 20px;
-    font-size: 12px;
-    font-weight: 700;
-    color: var(--m-gray);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
-
-.dashboard-menu {
-    list-style: none;
-    padding: 10px 0;
-    margin: 0;
-}
-
-.dashboard-menu a {
     display: flex;
-    align-items: center;
-    padding: 12px 20px;
-    color: var(--m-dark);
-    text-decoration: none;
-    font-size: 14px;
-    transition: 0.2s;
-    border-left: 3px solid transparent;
+    flex-direction: column;
+    gap: 20px;
+    padding: 0 15px 40px;
 }
 
-.dashboard-menu a i { margin-right: 15px; width: 20px; color: #686b78; }
-
-.dashboard-menu a:hover, .dashboard-menu a.active {
-    background: #f5f5f6;
-    color: var(--m-pink);
-}
-
-.dashboard-menu a.active {
-    font-weight: 700;
-    border-left: 3px solid var(--m-pink);
-}
-.dashboard-menu a.active i { color: var(--m-pink); }
-
-.logout-box { padding: 20px; border-top: 1px solid var(--m-border); margin-top: 10px; }
-.logout-btn {
-    display: block;
-    padding: 10px;
-    text-align: center;
-    color: var(--m-dark);
-    border: 1px solid var(--m-border);
-    text-decoration: none;
-    font-size: 12px;
-    font-weight: 700;
-    border-radius: 4px;
-}
-
-/* ================= MAIN CONTENT ================= */
 .dashboard-main {
     flex-grow: 1;
+    background: #fff;
+    padding: 20px;
+    border-radius: 4px;
+    border: 1px solid var(--m-border);
 }
 
 .profile-header {
     display: flex;
-    align-items: flex-start;
-    padding-bottom: 30px;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding-bottom: 20px;
     border-bottom: 1px solid var(--m-border);
-    margin-bottom: 30px;
+    margin-bottom: 20px;
+    gap: 15px;
 }
 
 .profile-avatar {
-    width: 90px;
-    height: 90px;
-    border-radius: 4px;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
     object-fit: cover;
-    margin-right: 25px;
-    border: 1px solid var(--m-border);
+    border: 2px solid var(--m-border);
 }
 
-.user-meta h2 { font-size: 24px; font-weight: 700; color: var(--m-dark); margin: 0; text-transform: lowercase; }
-.user-meta p { font-size: 14px; color: var(--m-gray); margin: 4px 0 15px; }
+.user-meta h2 {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--m-dark);
+    margin: 0;
+}
+
+.user-meta p {
+    font-size: 13px;
+    color: var(--m-gray);
+    margin: 4px 0 15px;
+}
 
 .btn-edit-small {
     font-size: 11px;
@@ -120,109 +75,113 @@
     color: var(--m-pink);
     text-transform: uppercase;
     border: 1px solid var(--m-pink);
-    padding: 6px 15px;
+    padding: 8px 16px;
     text-decoration: none;
     border-radius: 2px;
+    transition: background 0.2s;
+}
+
+.btn-edit-small:hover {
+    background: var(--m-pink);
+    color: #fff;
 }
 
 /* Stats Cards */
 .m-stats-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 20px;
+    grid-template-columns: 1fr;
+    gap: 15px;
 }
 
 .m-stat-card {
     border: 1px solid var(--m-border);
-    padding: 20px;
+    padding: 15px;
     border-radius: 4px;
 }
 
-.m-stat-card .label { font-size: 11px; font-weight: 700; color: var(--m-gray); text-transform: uppercase; display: block; margin-bottom: 12px; }
-.m-stat-card .value { font-size: 18px; font-weight: 700; color: var(--m-dark); }
-
-/* ================= MOBILE SYSTEM ================= */
-.mobile-account-nav {
-    display: none;
-    padding: 15px 20px;
-    background: #fff;
-    border-bottom: 1px solid var(--m-border);
-    justify-content: space-between;
-    align-items: center;
+.m-stat-card .label {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--m-gray);
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: 8px;
 }
 
-@media (max-width: 768px) {
-    .mobile-account-nav { display: flex; }
-    .central-container { flex-direction: column; padding: 20px; }
+.m-stat-card .value {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--m-dark);
+}
 
-    .dashboard-sidebar {
-        position: fixed;
-        top: 0;
-        left: -100%; /* Start off-screen */
-        height: 100vh;
-        background: #fff;
-        z-index: 9999;
-        transition: 0.3s ease;
-        box-shadow: 10px 0 20px rgba(0,0,0,0.1);
-        padding-top: 20px;
+.m-stat-card .link {
+    font-size: 12px;
+    color: var(--m-pink);
+    text-decoration: none;
+    font-weight: 700;
+    margin-top: 10px;
+    display: inline-block;
+}
+
+/* ================= DESKTOP (min-width: 768px) ================= */
+@media (min-width: 768px) {
+    .dashboard-wrapper { padding-top: 30px; }
+    
+    .central-container {
+        max-width: 1200px;
+        flex-direction: row;
+        padding: 0 20px 40px;
+        gap: 40px;
     }
 
-    .dashboard-sidebar.open { left: 0; } /* Slide into view */
-
-    .sidebar-overlay {
-        display: none;
-        position: fixed;
-        inset: 0;
-        background: rgba(0,0,0,0.5);
-        z-index: 9998;
+    .dashboard-main {
+        padding: 0;
+        background: transparent;
+        border: none;
     }
-    .sidebar-overlay.show { display: block; }
 
-    .profile-header { flex-direction: column; align-items: flex-start; }
-    .profile-avatar { margin-bottom: 15px; }
+    .profile-header {
+        flex-direction: row;
+        align-items: flex-start;
+        text-align: left;
+        padding-bottom: 30px;
+        margin-bottom: 30px;
+        gap: 25px;
+    }
+
+    .profile-avatar {
+        width: 100px;
+        height: 100px;
+    }
+
+    .user-meta h2 { font-size: 24px; }
+    .user-meta p { font-size: 14px; }
+
+    .m-stats-grid {
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 20px;
+    }
+    
+    .m-stat-card { padding: 20px; background: #fff; }
+    .m-stat-card .value { font-size: 18px; }
 }
 </style>
-
-<div class="mobile-account-nav">
-    <span style="font-weight: 700; font-size: 14px; letter-spacing: 0.5px;">ACCOUNT</span>
-    <button onclick="toggleSidebar()" style="background:none; border:none; font-size:18px; color: var(--m-pink);">
-        <i class="fa fa-bars"></i> MENU
-    </button>
-</div>
-
-<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
 
 <div class="dashboard-wrapper">
     {% include "includes/alerts.html" %}
 
     <div class="central-container">
-        <aside class="dashboard-sidebar" id="dashboardSidebar">
-            <div class="sidebar-heading">Account Overview</div>
-            <nav class="dashboard-menu">
-                <a href="{% url 'dashboard' %}" class="{% if '/dashboard/' in request.path %}active{% endif %}">
-                    <i class="fa fa-th-large"></i> Overview
-                </a>
-                <a href="{% url 'my_orders' %}" class="{% if '/my_orders/' in request.path %}active{% endif %}">
-                    <i class="fa fa-shopping-bag"></i> Orders
-                </a>
-                <a href="{% url 'edit_profile' %}" class="{% if '/edit_profile/' in request.path %}active{% endif %}">
-                    <i class="fa fa-user"></i> Profile Details
-                </a>
-                <a href="{% url 'change_password' %}" class="{% if '/change_password/' in request.path %}active{% endif %}">
-                    <i class="fa fa-lock"></i> Change Password
-                </a>
-            </nav>
-            <div class="logout-box">
-                <a href="{% url 'logout' %}" class="logout-btn">LOG OUT</a>
-            </div>
-        </aside>
+        
+        <!-- Reusable Sidebar -->
+        {% include 'includes/dashboard_sidebar.html' %}
 
+        <!-- Main Content -->
         <main class="dashboard-main">
             <div class="profile-header">
                 {% if 'http' in userprofile.profile_picture.name %}
-                    <img src="{{ userprofile.profile_picture.name }}" alt="User Profile" width="50" height="50" style="border-radius: 50%;">
+                    <img src="{{ userprofile.profile_picture.name }}" alt="User Profile" class="profile-avatar">
                 {% else %}
-                    <img src="{{ userprofile.profile_picture.url }}" alt="User Profile" width="50" height="50" style="border-radius: 50%;">
+                    <img src="{{ userprofile.profile_picture.url }}" alt="User Profile" class="profile-avatar">
                 {% endif %}
                 <div class="user-meta">
                     <h2>{{ user.full_name }}</h2>
@@ -235,28 +194,27 @@
                 <div class="m-stat-card">
                     <span class="label">Orders</span>
                     <span class="value">{{ orders_count }} Placed</span>
-                    <a href="{% url 'my_orders' %}" style="font-size: 12px; color: var(--m-pink); text-decoration: none; font-weight: 700; margin-top: 12px; display: block;">View All →</a>
+                    <a href="{% url 'my_orders' %}" class="link">View All &rarr;</a>
                 </div>
                 
                 <div class="m-stat-card">
                     <span class="label">Mobile Number</span>
-                    <span class="value">{% if user.phone_number %}{{ user.phone_number }}{% else %}Not Added{% endif %}</span>
+                    <span class="value">
+                        {% if user.phone_number %}
+                            {{ user.phone_number }}
+                        {% else %}
+                            Not Added
+                        {% endif %}
+                    </span>
                     <div style="margin-top: 10px;">
-                        <span style="color:#03a685; font-size: 11px; font-weight: 700;"><i class="fa fa-check-circle"></i> Verified</span>
+                        <span style="color:#03a685; font-size: 11px; font-weight: 700;">
+                            <i class="fa fa-check-circle"></i> Verified
+                        </span>
                     </div>
                 </div>
             </div>
         </main>
     </div>
 </div>
-
-<script>
-function toggleSidebar() {
-    const sidebar = document.getElementById('dashboardSidebar');
-    const overlay = document.getElementById('sidebarOverlay');
-    sidebar.classList.toggle('open');
-    overlay.classList.toggle('show');
-}
-</script>
 
 {% endblock %}
