@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser , BaseUserManager
-
+# from store.models import Product
 
 
 # Create your models here.
@@ -82,7 +82,6 @@ class UserProfile(models.Model):
     city = models.CharField(max_length=50, blank=True)
     country = models.CharField(max_length=50, blank=True)
     state = models.CharField(max_length=50, blank=True)
-    
         
     def __str__(self):
         return self.user.first_name
@@ -92,3 +91,14 @@ class UserProfile(models.Model):
     
 
 
+class Wishlist(models.Model):
+    user = models.ForeignKey(Account, on_delete=models.CASCADE)
+    product = models.ForeignKey('store.Product', on_delete=models.CASCADE)
+    added_date = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        # Ek user ek product ko do baar wishlist mein nahi daal sakta
+        unique_together = ('user', 'product') 
+
+    def __str__(self):
+        return f"{self.user.username} - {self.product.product_name}"

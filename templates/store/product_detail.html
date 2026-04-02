@@ -85,6 +85,44 @@
         transform-origin: center center;
     }
 
+    /* Buttons Container (Naya Code) */
+    .action-buttons-wrapper {
+        display: flex;
+        gap: 15px;
+        margin-top: 15px;
+        align-items: stretch;
+    }
+
+    .btn-add-cart {
+        background-color: var(--myntra-pink); border: none; color: white;
+        padding: 15px 40px; font-size: 16px; font-weight: 700; border-radius: 4px;
+        flex: 1; /* Button ko available space lene dega */
+        text-transform: uppercase; display: flex;
+        align-items: center; justify-content: center; gap: 10px;
+        cursor: pointer; transition: opacity 0.3s ease;
+    }
+    .btn-add-cart:hover { opacity: 0.9; }
+
+    /* Naya Wishlist Button Style */
+    .btn-wishlist {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 55px; /* Square shape ke liye */
+        border: 1px solid var(--myntra-border);
+        border-radius: 4px;
+        color: var(--myntra-dark);
+        font-size: 20px;
+        cursor: pointer;
+        background: #fff;
+        transition: all 0.3s ease;
+        text-decoration: none;
+    }
+    .btn-wishlist:hover {
+        border-color: var(--myntra-pink);
+        color: var(--myntra-pink);
+    }
+
     @media (min-width: 769px) {
         .pdp-gallery { flex-direction: row; align-items: flex-start; }
         .gallery-thumbnails { flex-direction: column; overflow-y: auto; max-height: 600px; padding-bottom: 0; padding-right: 5px; }
@@ -285,9 +323,15 @@
                 {% if single_product.stock <= 0 %}
                     <div class="alert alert-danger mt-3" style="font-weight: 700; color: #721c24; background-color: #f8d7da; padding: 12px; border-radius: 4px;">OUT OF STOCK</div>
                 {% else %}
-                    <button type="submit" class="btn-add-cart">
-                        <i class="fa fa-shopping-bag"></i> Add to Bag
-                    </button>
+                    <div class="action-buttons-wrapper">
+                        <button type="submit" class="btn-add-cart">
+                            <i class="fa fa-shopping-bag"></i> Add to Bag
+                        </button>
+                        
+                        <a href="{% url 'toggle_wishlist' single_product.id %}" class="btn-wishlist" title="Add to Wishlist">
+                            <i class="fa fa-heart-o"></i>
+                        </a>
+                    </div>
                 {% endif %}
             </form>
         </main>

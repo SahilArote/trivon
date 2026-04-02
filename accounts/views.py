@@ -1,7 +1,8 @@
 from orders.services.shiprocket import track_shipment_live # Apna import path check kar lena
 from django.shortcuts import render , redirect , get_object_or_404
 from .forms import RegistrationForm,  UserForm, UserProfileForm
-from .models import Account, UserProfile
+from .models import Account, UserProfile, Wishlist
+from store.models import Product
 from orders.models import Order, OrderProduct
 from django.contrib import messages ,auth
 from django.contrib.auth.decorators import login_required
@@ -454,4 +455,32 @@ def order_status_api(request, order_number):
         'awb_code': order.awb_code,
         'courier_name': order.courier_name or "Not Assigned",
     })
+
+
+# Wishlist page dikhane ke liye
+@login_required(login_url='login')
+def wishlist(request):
+    wishlist_items = Wishlist.objects.filter(user=request.user).order_by('-added_date')
+    context = {
+        'wishlist_items': wishlist_items,
+    }
+    return render(request, 'store/wishlist.html', context)
+
+# Product ko wishlist mein add ya remove karne ke liye
+@login_required(login_url='login')
+def toggle_wishlist(request, product_id):
+    product = get_object_or_404(Product, id=product_id)
+    
+    # Check karein ki kya yeh product pehle se wishlist mein hai
+    wishlist_item = Wishlist.objects.filter(user=request.user, product=product).first()
+    
+    if wishlist_item:
+        # Agar pehle se hai, toh usko remove kar do (un-favorite)
+        wishlist_item.delete()
+    else:
+        # Agar nahi hai, toh add kar do
+        Wishlist.objects.create(user=request.user, product=product)
+        
+    # Jis page par user tha, usko wapas wahi redirect kar do
+    return redirect(request.META.get('HTTP_REFERER', 'store'))
 
