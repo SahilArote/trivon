@@ -1,7 +1,7 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
 {% load static %}
-{% block content %}
 
+{% block content %}
 <style>
     /* ==========================================================================
        CSS VARIABLES & GLOBAL RESET
@@ -277,6 +277,7 @@
         align-items: center;
         padding-bottom: 16px;
         border-bottom: 1px solid var(--border-color);
+        gap: 15px; /* Added gap for mobile safety */
     }
 
     .item-row:last-child {
@@ -288,6 +289,7 @@
         display: flex;
         flex-direction: column;
         gap: 4px;
+        flex: 1; /* Allow taking remaining space */
     }
 
     .item-name {
@@ -306,6 +308,7 @@
         flex-direction: column;
         align-items: flex-end;
         gap: 4px;
+        min-width: 80px; /* Ensure price doesn't squish */
     }
 
     .item-total {
@@ -373,24 +376,6 @@
         transform: translateY(-2px);
     }
 
-    .btn-ghost {
-        background-color: transparent;
-        color: var(--dark-text);
-        border: 1px solid var(--border-color);
-        padding: 16px 24px;
-        font-size: 14px;
-        font-weight: 700;
-        border-radius: 8px;
-        cursor: pointer;
-        width: 100%;
-        text-align: center;
-        transition: background-color 0.3s;
-    }
-
-    .btn-ghost:hover {
-        background-color: var(--bg-soft);
-    }
-
     .delivery-note {
         background: #e6f6f4;
         color: var(--success-green);
@@ -402,6 +387,54 @@
         align-items: center;
         gap: 8px;
         margin-bottom: 25px;
+    }
+
+    /* ==========================================================================
+       MOBILE RESPONSIVE TWEAKS (NEW)
+       ========================================================================== */
+    @media (max-width: 576px) {
+        .success-container {
+            padding: 20px 15px 40px 15px;
+        }
+
+        .success-title {
+            font-size: 24px;
+        }
+
+        .success-circle {
+            width: 60px;
+            height: 60px;
+            margin-bottom: 15px;
+        }
+
+        .success-icon {
+            width: 30px;
+            height: 30px;
+        }
+
+        .step-line {
+            width: 20px;
+            margin: 0 10px;
+        }
+
+        .step {
+            font-size: 10px;
+        }
+
+        .card {
+            padding: 16px;
+        }
+
+        /* Stack item details on very small screens */
+        .item-row {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 8px;
+        }
+
+        .item-pricing {
+            align-items: flex-start; /* Align left when stacked */
+        }
     }
 
     /* ==========================================================================
@@ -498,22 +531,22 @@
             </div>
 
             <div class="card">
-                        <h2 class="section-title">Items Ordered</h2>
-                        <div class="item-list">
-                            {% for item in ordered_products %}
-                            <div class="item-row">
-                                <div class="item-details">
-                                    <span class="item-name">{{ item.product.product_name }}</span>
-                                    <span class="item-qty">Qty: {{ item.quantity }}</span>
-                                </div>
-                                <div class="item-pricing">
-                                    <span class="item-total">$ {{ item.product_price|floatformat:2|add:0|stringformat:"s"|floatformat:2 }}</span>
-                                    <span class="item-unit">$ {{ item.product_price }} each</span>
-                                </div>
-                            </div>
-                            {% endfor %}
+                <h2 class="section-title">Items Ordered</h2>
+                <div class="item-list">
+                    {% for item in ordered_products %}
+                    <div class="item-row">
+                        <div class="item-details">
+                            <span class="item-name">{{ item.product.product_name }}</span>
+                            <span class="item-qty">Qty: {{ item.quantity }}</span>
+                        </div>
+                        <div class="item-pricing">
+                            <span class="item-total">₹ {{ item.product_price|floatformat:2|add:0|stringformat:"s"|floatformat:2 }}</span>
+                            <span class="item-unit">₹ {{ item.product_price }} each</span>
                         </div>
                     </div>
+                    {% endfor %}
+                </div>
+            </div>
 
         </div>
 
@@ -523,16 +556,16 @@
                 
                 <div class="summary-row">
                     <span class="info-label">Subtotal</span>
-                    <span class="info-value">$ {{ subtotal|floatformat:2 }}</span>
+                    <span class="info-value">₹ {{ subtotal|floatformat:2 }}</span>
                 </div>
                 <div class="summary-row">
                     <span class="info-label">Tax</span>
-                    <span class="info-value">$ {{ order.tax|floatformat:2 }}</span>
+                    <span class="info-value">₹ {{ order.tax|floatformat:2 }}</span>
                 </div>
                 
                 <div class="summary-row grand-total">
                     <span>Grand Total</span>
-                    <span>$ {{ order.order_total|floatformat:2 }}</span>
+                    <span>₹ {{ order.order_total|floatformat:2 }}</span>
                 </div>
 
                 <div class="delivery-note">
@@ -542,8 +575,7 @@
 
                 <div class="btn-actions">
                     <a href="{% url 'store' %}" class="btn-primary">Continue Shopping</a>
-                    <a href="#" class="btn-ghost" onclick="window.print(); return false;">Download Invoice</a>
-                </div>
+                    </div>
             </div>
         </div>
 

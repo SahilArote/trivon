@@ -490,15 +490,7 @@
                 </div>
             </div>
 
-            <div class="card">
-                <div class="card-header-flex">
-                    <h5 class="section-title">Payment Method</h5>
-                </div>
-                <div class="payment-method-row">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/b/b5/PayPal.svg" alt="PayPal" class="payment-icon">
-                    <span>PayPal Secure Checkout</span>
-                </div>
-            </div>
+        
 
             <div class="card">
                 <div class="card-header-flex">
@@ -540,11 +532,18 @@
                 
                 <div class="price-row">
                     <span>Total MRP</span>
-                    <span>₹{{ totel }}</span>
+                    <span><i class="fa fa-inr"></i> {{ total_mrp }}</span> </div>
+                
+                {% if discount > 0 %}
+                <div class="price-row" style="color: var(--success-green);">
+                    <span>Discount on MRP</span>
+                    <span>- <i class="fa fa-inr"></i> {{ discount }}</span>
                 </div>
+                {% endif %}
+                
                 <div class="price-row">
                     <span>Tax</span>
-                    <span>₹{{ tax }}</span>
+                    <span><i class="fa fa-inr"></i> {{ tax }}</span>
                 </div>
                 <div class="price-row free-shipping">
                     <span>Shipping</span>
@@ -553,9 +552,8 @@
 
                 <div class="price-row total-row">
                     <span>Grand Total</span>
-                    <span>₹{{ grand_totel }}</span>
+                    <span><i class="fa fa-inr"></i> {{ grand_totel }}</span>
                 </div>
-
                 <div class="delivery-badge">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg>
                     <span>Free & Fast Delivery</span>
@@ -563,7 +561,7 @@
 
                 
                 <button id="rzp-button1" class="btn w-100 font-weight-bold mt-3" style="background-color: #ff3f6c; color: white; padding: 12px 0; font-size: 16px; border-radius: 4px; border: none;">
-                    <i class="fa fa-lock"></i> Pay securely with Razorpay
+                    <i class="fa fa-inr"></i> Pay securely with Razorpay
                 </button>
 
                 <form style="display: none;">

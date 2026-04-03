@@ -27,6 +27,66 @@
         margin: 20px auto;
         padding: 0 20px;
     }
+    /* Price Container */
+    .price-wrap {
+        margin: 20px 0;
+        border-bottom: 1px solid var(--myntra-border);
+        padding-bottom: 15px;
+    }
+
+    /* Premium Price Layout */
+    .price-main-row {
+        display: flex;
+        flex-direction: column; /* Current price ko upar aur MRP ko neeche set karega */
+        gap: 6px; 
+        margin-bottom: 6px;
+    }
+
+    .mrp-discount-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    /* Current Selling Price (Bigger & Bolder) */
+    .current-price {
+        font-size: 28px; 
+        font-weight: 800; 
+        color: var(--myntra-dark);
+        line-height: 1;
+    }
+
+    /* Old MRP Price */
+    .p-old {
+        font-size: 16px; /* Size chota kiya gaya hai */
+        color: var(--myntra-gray);
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    /* 'MRP' text specifically aur chota */
+    .mrp-label {
+        font-size: 12px; 
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    /* Discount Percentage */
+    .p-off {
+        font-size: 16px; 
+        font-weight: 700;
+        color: var(--myntra-orange, #ff905a); 
+        letter-spacing: 0.5px;
+    }
+
+    /* Tax info below the price */
+    .tax-info {
+        color: var(--myntra-green, #03a685);
+        font-size: 13px;
+        font-weight: 700;
+        display: block;
+    }
 
     .pdp-main-row {
         display: flex;
@@ -85,42 +145,59 @@
         transform-origin: center center;
     }
 
-    /* Buttons Container (Naya Code) */
+   /* Buttons Container */
     .action-buttons-wrapper {
         display: flex;
+        
         gap: 15px;
-        margin-top: 15px;
-        align-items: stretch;
+        margin-top: 25px;
+        align-items: center;
+
     }
 
+    /* Add to Bag Button */
     .btn-add-cart {
-        background-color: var(--myntra-pink); border: none; color: white;
-        padding: 15px 40px; font-size: 16px; font-weight: 700; border-radius: 4px;
-        flex: 1; /* Button ko available space lene dega */
-        text-transform: uppercase; display: flex;
-        align-items: center; justify-content: center; gap: 10px;
-        cursor: pointer; transition: opacity 0.3s ease;
+        background-color: var(--myntra-pink);
+        color: white;
+        border: none;
+        padding: 16px 20px;
+        font-size: 16px;
+        font-weight: 700;
+        border-radius: 4px;
+        flex: 1; /* Makes it take up available space equally */
+        text-transform: uppercase;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        cursor: pointer;
+        padding: 0;
+        transition: opacity 0.3s ease;
+        height: 54px; /* Fixed height for consistency */
     }
     .btn-add-cart:hover { opacity: 0.9; }
 
-    /* Naya Wishlist Button Style */
+
     .btn-wishlist {
         display: flex;
         align-items: center;
         justify-content: center;
-        width: 55px; /* Square shape ke liye */
+        flex: 1; 
+        height: 54px; 
         border: 1px solid var(--myntra-border);
         border-radius: 4px;
-        color: var(--myntra-dark);
-        font-size: 20px;
+        color: var(--myntra-dark);  
+        font-size: 15px;
+        font-weight: 700;
         cursor: pointer;
         background: #fff;
-        transition: all 0.3s ease;
+        transition: border-color 0.3s ease, color 0.3s ease;
         text-decoration: none;
+        text-transform: uppercase;
+        gap: 8px; /* Space between icon and text */
     }
     .btn-wishlist:hover {
-        border-color: var(--myntra-pink);
-        color: var(--myntra-pink);
+        border-color: var(--myntra-dark); /* Slightly darker border on hover for outline buttons */
     }
 
     @media (min-width: 769px) {
@@ -270,11 +347,20 @@
                     {% endif %}
                 </div>
 
-                <div class="price-wrap">
+              <div class="price-wrap">
+                <div class="price-main-row">
                     <span class="current-price">₹{{ single_product.price }}</span>
-                    <span class="tax-info">inclusive of all taxes</span>
+                    
+                    {% if single_product.mrp and single_product.mrp > single_product.price %}
+                    <div class="mrp-discount-row">
+                        <span class="p-old"><span class="mrp-label">MRP</span> <del>₹{{ single_product.mrp }}</del></span>
+                        <span class="p-off">({{ single_product.discount_percentage }}% OFF)</span>
+                    </div>
+                    {% endif %}
                 </div>
-
+                
+                <span class="tax-info">inclusive of all taxes</span>
+            </div>
                 <p style="font-size: 15px; line-height: 1.6; color: var(--myntra-gray);">{{ single_product.description }}</p>
                 
                 <div class="mt-4">
@@ -307,6 +393,7 @@
                                 <div class="pill-content">
                                     <span class="pill-value">{{ i.variation_value | capfirst }}</span>
                                     <span class="pill-price">₹{{ single_product.price }}</span>
+                                    
                                 </div>
                                 {% if forloop.first %} <div class="low-stock-badge">1 left</div> {% endif %}
                             </label>
@@ -325,12 +412,21 @@
                 {% else %}
                     <div class="action-buttons-wrapper">
                         <button type="submit" class="btn-add-cart">
-                            <i class="fa fa-shopping-bag"></i> Add to Bag
+                            <i class="fa fa-shopping-bag"></i> ADD TO BAG
                         </button>
                         
-                        <a href="{% url 'toggle_wishlist' single_product.id %}" class="btn-wishlist" title="Add to Wishlist">
-                            <i class="fa fa-heart-o"></i>
-                        </a>
+                        {% if in_wishlist %}
+                            <a href="{% url 'toggle_wishlist' single_product.id %}" class="btn-wishlist" style="border-color: var(--myntra-pink);" title="Remove from Wishlist">
+                                <i class="fa fa-heart" style="font-size: 18px; color: var(--myntra-pink);"></i> 
+                                <span style="color: var(--myntra-pink);">WISHLISTED</span>
+                            </a>
+                        {% else %}
+                            <a href="{% url 'toggle_wishlist' single_product.id %}" class="btn-wishlist" title="Add to Wishlist">
+                                <i class="fa fa-heart-o" style="font-size: 18px;"></i> 
+                                <span>WISHLIST</span>
+                            </a>
+                        {% endif %}
+                        
                     </div>
                 {% endif %}
             </form>

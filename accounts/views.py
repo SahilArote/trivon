@@ -403,7 +403,7 @@ def track_order(request, order_number):
     current_status = "Processing"  # Default status jab tak courier pick na kare
     tracking_activities = []
 
-    # Agar order Shiprocket par push ho chuka hai (shipment_id aa gayi hai)
+    # Agar order Shiprocket par push ho chuka hai 
     if order.shiprocket_shipment_id:
         
         # Shiprocket ke server se LIVE data mangwana
@@ -415,7 +415,7 @@ def track_order(request, order_number):
             # Agar tracking active hai (track_status == 1)
             if tracking_data.get('track_status') == 1:
                 
-                # 1. LIVE CURRENT STATUS NIKALNA
+                
                 shipment_track = tracking_data.get('shipment_track', [])
                 if shipment_track:
                     raw_status = shipment_track[0].get('current_status', 'Processing').upper()
@@ -430,7 +430,7 @@ def track_order(request, order_number):
                     else:
                         current_status = raw_status
 
-                # 2. LIVE HISTORY NIKALNA (Date, Activity, Location)
+                
                 raw_activities = tracking_data.get('shipment_track_activities', [])
                 
                 # Shiprocket ki list ko apne HTML wale format mein convert karna

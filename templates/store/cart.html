@@ -691,15 +691,22 @@
             </div>
 
             <div>
-                <div class="summary-title">Price Details ({{ cart_items|length }} Items)</div>
+                <div class="summary-title">Price Details ({{ quantity }} Items)</div>
                 
                 <div class="summary-row">
                     <span>Total MRP</span>
-                    <span>₹{{ totel }}</span>
+                    <span>₹{{ total_mrp }}</span>
                 </div>
                 
+                {% if discount > 0 %}
+                <div class="summary-row" style="color: var(--success-green);">
+                    <span>Discount on MRP</span>
+                    <span>- ₹{{ discount }}</span>
+                </div>
+                {% endif %}
+                
                 <div class="summary-row">
-                    <span>Tax</span>
+                    <span>Tax (2%)</span>
                     <span>₹{{ tax }}</span>
                 </div>
                 

@@ -730,12 +730,20 @@
 
                     <div class="price-row">
                         <span>Total MRP</span>
-                        <span>₹ {{ totel }}</span>
+                        <span>₹ {{ total_mrp }}</span> </div>
+                    
+                    {% if discount > 0 %}
+                    <div class="price-row" style="color: var(--success-green);">
+                        <span>Discount on MRP</span>
+                        <span>- ₹ {{ discount }}</span>
                     </div>
+                    {% endif %}
+                    
                     <div class="price-row">
                         <span>Tax</span>
                         <span>₹ {{ tax }}</span>
                     </div>
+                    
                     <div class="price-row" style="color: var(--success-green);">
                         <span>Shipping</span>
                         <span>FREE</span>
@@ -870,7 +878,7 @@
         });
 
         // ==========================================================
-        // 4. NAYA CODE: LIVE LOCATION FETCHING LOGIC
+        // 4.LIVE LOCATION FETCHING LOGIC
         // ==========================================================
         const getLocationBtn = document.getElementById('getLocationBtn');
         const locationStatus = document.getElementById('locationStatus');

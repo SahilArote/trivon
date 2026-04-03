@@ -1,5 +1,7 @@
 
 from django.shortcuts import render , get_object_or_404, redirect
+
+from accounts.models import Wishlist
 from .models import Product, ReviewRating, Variation
 from category.models import Category
 from carts.models import CartItem
@@ -9,6 +11,7 @@ from carts.views import _cart_id
 from django.db.models import Q
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from orders.models import OrderProduct    
+from django.db.models import F, ExpressionWrapper, FloatField
 
 # Create your views here.
 def store(request, category_slug=None):
@@ -31,6 +34,30 @@ def store(request, category_slug=None):
 
         if max_price:
             products = products.filter(price__lte=int(max_price))
+    except (ValueError, TypeError):
+        pass
+
+    max_discount = request.GET.get('max_discount') 
+    min_discount = request.GET.get('min_discount') 
+
+    try:
+        if max_discount or min_discount:
+            # Sirf unhi products par calculation hogi jinka MRP price se zyada hai
+            products = products.filter(mrp__isnull=False, mrp__gt=F('price'))
+            
+            # Database ke andar real-time Discount Percentage calculate karna
+            products = products.annotate(
+                calculated_discount=ExpressionWrapper(
+                    ((F('mrp') - F('price')) * 100.0) / F('mrp'),
+                    output_field=FloatField()
+                )
+            )
+
+            # Ab us calculation ke hisaab se filter karna
+            if max_discount:
+                products = products.filter(calculated_discount__lte=int(max_discount), calculated_discount__gt=0)
+            if min_discount:
+                products = products.filter(calculated_discount__gte=int(min_discount))
     except (ValueError, TypeError):
         pass
 
@@ -91,10 +118,15 @@ def product_detail(request, category_slug, product_slug):
 
     reviews = ReviewRating.objects.filter(product_id=single_product, status=True)
 
+    in_wishlist = False
+    if request.user.is_authenticated:
+        in_wishlist = Wishlist.objects.filter(user=request.user, product=single_product).exists()
+
     context = {
         'single_product': single_product,
         'in_cart': in_cart,
         'orderproduct': orderproduct,
+        'in_wishlist': in_wishlist,
         'reviews': reviews,
         'related_products': related_products,
     } 

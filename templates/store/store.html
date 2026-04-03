@@ -321,14 +321,18 @@
                         <span class="p-name">Fashion Essentials</span>
                         <div class="price-meta">
                             <span class="p-price">₹{{ product.price }}</span>
-                            <span class="p-old">₹1,999</span>
-                            <span class="p-off">(50% OFF)</span>
+                            {% if product.mrp > product.price %}
+                                <del class="p-old">₹{{ product.mrp }}</del>
+                            {% endif %}
+                            {% if product.discount_percentage > 0 %}
+                                <span class="p-off">{{ product.discount_percentage }}% OFF</span>
+                            {% endif %}
                         </div>
                     </div>
                 </a>
                 {% empty %}
                 <div class="no-results-container">
-                    <img src="https://constant.myntassets.com/checkout/assets/img/empty-bag.webp" alt="No results" class="no-results-icon">
+                    <img src="{% static 'images/shopping-cart-icon-shopping-basket-on-transparent-background-free-png.webp' %}" alt="No results" class="no-results-icon">
                     <h3 class="no-results-title">No results found!</h3>
                     <p class="no-results-text">We couldn't find any products matching your current filters. Try adjusting your price range or selecting different sizes.</p>
                     <a href="{% url 'store' %}" class="btn-reset">Clear All Filters</a>

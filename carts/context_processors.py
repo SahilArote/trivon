@@ -1,4 +1,6 @@
 from carts.models import Cart , CartItem
+from accounts.models import Wishlist
+from django.shortcuts import get_object_or_404
 from .views import _cart_id 
 
 
@@ -24,5 +26,6 @@ def counter(request):
 
     return dict(cart_count=cart_count)        
 
-       
+
+
 

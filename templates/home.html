@@ -117,15 +117,15 @@
     </div>
     <div class="category_heading">MEDAL WORTHY BRANDS TO BAG</div>
     <div class="category_items">
-        <a href="#"><img class="sale_item" src="{% static 'images/off/1.png' %}"></a>
-        <a href="#"><img class="sale_item" src="{% static 'images/off/2.png' %}"></a>
+        <a href="{% url 'store' %}?min_discount=40"><img class="sale_item" src="{% static 'images/off/1.png' %}"></a>
+        <a href="{% url 'store' %}?max_discount=50"><img class="sale_item" src="{% static 'images/off/2.png' %}"></a>
         <a href="#"><img class="sale_item" src="{% static 'images/off/3.png' %}"></a>
         <a href="#"><img class="sale_item" src="{% static 'images/off/4.png' %}"></a>
         <a href="#"><img class="sale_item" src="{% static 'images/off/5.png' %}"></a>
         <a href="#"><img class="sale_item" src="{% static 'images/off/6.png' %}"></a>
         <a href="#"><img class="sale_item" src="{% static 'images/off/7.png' %}"></a>
         <a href="#"><img class="sale_item" src="{% static 'images/off/8.png' %}"></a>
-        <a href="#"><img class="sale_item" src="{% static 'images/off/9.png' %}"></a>
+        <a href="{% url 'products_by_category' 'shoes' %}?min_discount=40"><img class="sale_item" src="{% static 'images/off/9.png' %}"></a>
         <a href="#"><img class="sale_item" src="{% static 'images/off/10.png' %}"></a>
         <a href="#"><img class="sale_item" src="{% static 'images/off/11.png' %}"></a>
         <a href="#"><img class="sale_item" src="{% static 'images/off/12.png' %}"></a>

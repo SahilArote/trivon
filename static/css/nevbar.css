@@ -1,3 +1,9 @@
+/* ================= CSS CUSTOM PROPERTIES (GLOBAL) ================= */
+:root {
+    --myntra-pink: #ff3f6c;
+    --myntra-dark: #282c3f;
+}
+
 /* ================= HEADER ================= */
 * {
     margin: 0;
@@ -70,12 +76,33 @@
 
 /* ICONS */
 .icon-btn {
-    font-size: 18px;
-    color: #222;
     position: relative;
+    display: inline-block;
+    color: var(--myntra-dark, #282c3f);
     text-decoration: none;
+    font-size: 22px;
 }
 
+/* Wishlist Badge - Pink Circular */
+.wishlist-badge {
+    position: absolute;
+    top: -6px;
+    right: -10px;
+    background-color: var(--myntra-pink, #ff3f6c);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 5px;
+    min-width: 16px;
+    height: 16px;
+    border-radius: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+}
+
+/* Cart Badge - Black Circular */
 .cart-badge {
     position: absolute;
     top: -6px;
@@ -83,8 +110,15 @@
     background: #000;
     color: #fff;
     font-size: 10px;
+    font-weight: 700;
     padding: 2px 5px;
-    border-radius: 50%;
+    min-width: 16px;
+    height: 16px;
+    border-radius: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
 }
 
 /* ================= RIGHT TOP BAR ================= */

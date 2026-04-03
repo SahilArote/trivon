@@ -1,17 +1,27 @@
 {% load static %}
-
+<style>
+    @media (max-width: 576px) {
+    /* Naye icon ko mobile par chhupayega kyunki wahan footer nav hai */
+    .desktop-store-btn {
+        display: none !important;
+    }
+    
+    /* ... aapka baaki mobile ka CSS yahan rahega ... */
+}
+</style>
 
 <header class="trivon-header">
     <div class="container-fluid px-3">
         <div class="trivon-header-row">
 
-            <!-- LEFT : LOGO (DESKTOP ONLY) -->
             <a href="{% url 'home' %}" class="trivon-logo">
                 <img src="{% static 'images/nowow.png' %}" alt="Logo">
             </a>
 
-            <!-- CENTER : SEARCH + ICONS -->
             <div class="trivon-center-actions">
+                <a href="{% url 'store' %}" class="icon-btn desktop-store-btn" title="Explore Store">
+                    <i class="fa fa-shopping-basket"></i>
+                </a>
                 <form action="{% url 'search' %}" method="GET" class="trivon-search">
                     <img src="{% static 'images/nowow.png' %}" class="search-logo" alt="logo">
                     <input type="text" name="keyword" placeholder="Search Now and Wow">
@@ -20,16 +30,19 @@
 
                 <a href="{% url 'wishlist' %}" class="icon-btn">
                     <i class="fa fa-heart"></i>
+                    {% if wishlist_count > 0 %}
                     <span class="wishlist-badge">{{ wishlist_count }}</span>
+                    {% endif %}
                 </a>
 
                 <a href="{% url 'cart' %}" class="icon-btn">
                     <i class="fa fa-shopping-bag"></i>
+                    {% if cart_count > 0 %}
                     <span class="cart-badge">{{ cart_count }}</span>
+                    {% endif %}
                 </a>
             </div>
 
-            <!-- RIGHT : TOP MINI BAR (DESKTOP ONLY) -->
             <div class="trivon-top-links">
                 {% if user.is_authenticated %}
                     <a href="{% url 'dashboard' %}">My Account</a>
@@ -45,7 +58,6 @@
         </div>
     </div>
 </header>
-<!-- ================= MOBILE FOOTER NAV ================= -->
 <div class="mobile-footer-nav">
 
     <a href="{% url 'home' %}" class="active">
@@ -76,4 +88,3 @@
     {% endif %}
 
 </div>
-

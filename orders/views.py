@@ -131,11 +131,22 @@ def place_order(request, totel=0, quantity=0):
 
     grand_totel = 0
     tax = 0
+    total_mrp = 0  # NAYA: MRP store karne ke liye
+    discount = 0   # NAYA: Discount calculate karne ke liye
+    
     for cart_item in cart_items:
         totel += (cart_item.product.price * cart_item.quantity)
         quantity += cart_item.quantity
+        
+        # NAYA: MRP calculation
+        item_mrp = cart_item.product.mrp if cart_item.product.mrp else cart_item.product.price
+        total_mrp += (item_mrp * cart_item.quantity)
+        
     tax = (2 * totel) / 100
     grand_totel = totel + tax
+    
+    # NAYA: Discount Calculation
+    discount = total_mrp - totel
 
 
     if request.method =='POST':
@@ -191,6 +202,8 @@ def place_order(request, totel=0, quantity=0):
                 'cart_items': cart_items,
                 'totel': totel,
                 'tax': tax,
+                'total_mrp': total_mrp,  # NAYA
+                'discount': discount,
                 'grand_totel': grand_totel,
                 # Frontend par Razorpay button lagane ke liye details bhej rahe hain
                 'razorpay_order_id': razorpay_order_id,

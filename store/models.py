@@ -10,7 +10,8 @@ class Product(models.Model):
     product_name = models.CharField(max_length=200, unique=True)
     slug = models.SlugField(max_length=200, unique=True)
     description = models.TextField(max_length=500, blank=True)
-    price = models.IntegerField()
+    mrp = models.IntegerField(blank=True, null=True, help_text="Original Price")
+    price = models.IntegerField(help_text="Selling Price")
     image = models.ImageField(upload_to='photos/products')
     stock = models.IntegerField()
     is_available = models.BooleanField(default=True)
@@ -42,6 +43,12 @@ class Product(models.Model):
         if reviews['count'] is not None:
             count = int(reviews['count'])
         return count
+    
+    def discount_percentage(self):
+        if self.mrp and self.mrp > self.price:
+            discount = ((self.mrp - self.price) / self.mrp) * 100
+            return int(discount)
+        return 0
 
 
 class VariationManager(models.Manager):

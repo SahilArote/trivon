@@ -1,28 +1,277 @@
 {% extends 'base.html' %}
+{% load static %}
+
 {% block content %}
-<div class="container mt-5">
-    <h2>My Wishlist</h2>
+<link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+<style>
+    :root {
+        --myntra-pink: #ff3f6c;
+        --myntra-dark: #282c3f;
+        --myntra-gray: #535766;
+        --myntra-light-gray: #7e818c;
+        --myntra-border: #eaeaec;
+        --bg-color: #fff;
+    }
+
+    body {
+        font-family: 'Assistant', sans-serif;
+        background-color: var(--bg-color);
+        -webkit-font-smoothing: antialiased;
+    }
+
+    /* Container */
+    .wishlist-container {
+        max-width: 1200px;
+        margin: 40px auto 80px;
+        padding: 0 20px;
+    }
+
+    /* Header */
+    .wishlist-header {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--myntra-dark);
+        margin-bottom: 30px;
+        display: flex;
+        align-items: center;
+        text-transform: capitalize;
+    }
     
+    .wishlist-count {
+        font-size: 16px;
+        font-weight: 400;
+        color: var(--myntra-light-gray);
+        margin-left: 10px;
+    }
+
+    /* Responsive Grid layout */
+    .wishlist-grid {
+        display: grid;
+        /* Mobile par min 2 columns (160px), desktop par auto */
+        grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+        gap: 30px 20px;
+    }
+
+    /* Card Design */
+    .wishlist-card {
+        border: 1px solid var(--myntra-border);
+        border-radius: 4px;
+        background: #fff;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        transition: box-shadow 0.3s ease-in-out, transform 0.2s ease;
+        overflow: hidden;
+    }
+
+    .wishlist-card:hover {
+        box-shadow: 0 4px 16px rgba(40, 44, 63, 0.08);
+    }
+
+    /* Image area with 3:4 perfect aspect ratio */
+    .wishlist-img-wrap {
+        position: relative;
+        width: 100%;
+        padding-top: 133.33%; /* Creates the 3:4 Fashion aspect ratio */
+        background-color: #f5f5f6;
+    }
+
+    .wishlist-img-wrap img {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    /* Cross (Remove) Icon on Top Right */
+    .btn-remove {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        width: 32px;
+        height: 32px;
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--myntra-light-gray);
+        text-decoration: none;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+        transition: all 0.2s ease;
+        z-index: 10;
+        font-size: 14px;
+    }
+
+    .btn-remove:hover {
+        color: var(--myntra-pink);
+        transform: scale(1.08);
+    }
+
+    /* Details Area */
+    .wishlist-details {
+        padding: 12px 15px;
+        text-align: center;
+        flex-grow: 1;
+    }
+
+    .product-name {
+        font-size: 14px;
+        color: var(--myntra-gray);
+        margin-bottom: 8px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .product-price {
+        font-size: 15px;
+        font-weight: 700;
+        color: var(--myntra-dark);
+    }
+
+    /* Bottom Action Button */
+    .wishlist-action {
+        border-top: 1px solid var(--myntra-border);
+        padding: 12px 0;
+        text-align: center;
+        background: #fff;
+    }
+
+    .wishlist-action a {
+        color: var(--myntra-pink);
+        font-size: 14px;
+        font-weight: 700;
+        text-transform: uppercase;
+        text-decoration: none;
+        display: block;
+        width: 100%;
+        transition: color 0.2s ease;
+    }
+
+    .wishlist-action a:hover {
+        color: #d32f58; /* Slightly darker pink */
+    }
+
+    /* Beautiful Empty State */
+    .empty-wishlist-box {
+        text-align: center;
+        padding: 80px 20px;
+    }
+
+    .empty-wishlist-box i {
+        font-size: 80px;
+        color: #eaeaec;
+        margin-bottom: 25px;
+    }
+
+    .empty-title {
+        font-size: 20px;
+        font-weight: 700;
+        color: var(--myntra-dark);
+        margin-bottom: 10px;
+    }
+
+    .empty-subtitle {
+        font-size: 16px;
+        color: var(--myntra-light-gray);
+        margin-bottom: 35px;
+    }
+
+    .btn-continue {
+        border: 1px solid var(--myntra-pink);
+        color: var(--myntra-pink);
+        background: transparent;
+        padding: 14px 45px;
+        font-size: 14px;
+        font-weight: 700;
+        border-radius: 4px;
+        text-transform: uppercase;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        display: inline-block;
+    }
+
+    .btn-continue:hover {
+        background: var(--myntra-pink);
+        color: #fff;
+    }
+
+    /* Entrance Animation */
+    .fade-up {
+        animation: fadeUp 0.5s ease-out forwards;
+        opacity: 0;
+        transform: translateY(15px);
+    }
+
+    @keyframes fadeUp {
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Mobile tweaks */
+    @media (max-width: 576px) {
+        .wishlist-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px 10px;
+        }
+        .wishlist-header { font-size: 16px; margin-bottom: 20px; }
+        .product-name { font-size: 12px; }
+        .product-price { font-size: 14px; }
+    }
+</style>
+
+<div class="wishlist-container">
+    
+    <div class="wishlist-header fade-up">
+        My Wishlist 
+        {% if wishlist_items %}
+            <span class="wishlist-count">- {{ wishlist_items|length }} items</span>
+        {% endif %}
+    </div>
+
     {% if wishlist_items %}
-        <div class="row">
+        <div class="wishlist-grid">
             {% for item in wishlist_items %}
-            <div class="col-md-3">
-                <div class="card mb-4">
-                    <img src="{{ item.product.image.url }}" class="card-img-top" alt="{{ item.product.product_name }}">
-                    <div class="card-body">
-                        <h5 class="card-title">{{ item.product.product_name }}</h5>
-                        <p class="card-text">₹{{ item.product.price }}</p>
-                        
-                        <a href="{{ item.product.get_url }}" class="btn btn-primary btn-sm">View Product</a>
-                        <a href="{% url 'toggle_wishlist' item.product.id %}" class="btn btn-danger btn-sm">Remove</a>
+            <div class="wishlist-card fade-up" style="animation-delay: {{ forloop.counter0|add:"1" }}00ms;">
+                
+                <div class="wishlist-img-wrap">
+                    <a href="{{ item.product.get_url }}">
+                        <img src="{{ item.product.image.url }}" alt="{{ item.product.product_name }}">
+                    </a>
+                    
+                    <a href="{% url 'toggle_wishlist' item.product.id %}" class="btn-remove" title="Remove from Wishlist">
+                        <i class="fa fa-times"></i>
+                    </a>
+                </div>
+
+                <div class="wishlist-details">
+                    <div class="product-name" title="{{ item.product.product_name }}">
+                        {{ item.product.product_name }}
+                    </div>
+                    <div class="product-price">
+                        ₹{{ item.product.price }}
                     </div>
                 </div>
+
+                <div class="wishlist-action">
+                    <a href="{{ item.product.get_url }}">VIEW PRODUCT</a>
+                </div>
+                
             </div>
             {% endfor %}
         </div>
     {% else %}
-        <p>Aapki wishlist abhi khali hai.</p>
-        <a href="{% url 'store' %}" class="btn btn-primary">Continue Shopping</a>
+        <div class="empty-wishlist-box fade-up">
+            <i class="fa fa-heart-o"></i>
+            <div class="empty-title">YOUR WISHLIST IS EMPTY</div>
+            <div class="empty-subtitle">Add items that you like to your wishlist. Review them anytime and easily move them to the bag.</div>
+            <a href="{% url 'store' %}" class="btn-continue">CONTINUE SHOPPING</a>
+        </div>
     {% endif %}
+
 </div>
 {% endblock %}

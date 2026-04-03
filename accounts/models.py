@@ -97,7 +97,6 @@ class Wishlist(models.Model):
     added_date = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        # Ek user ek product ko do baar wishlist mein nahi daal sakta
         unique_together = ('user', 'product') 
 
     def __str__(self):

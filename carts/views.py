@@ -173,23 +173,35 @@ def remove_cart_item(request, product_id, cart_item_id):
 
 
 
-def cart(request , totel=0 , quantity=0 , cart_items=None):
+def cart(request, totel=0, quantity=0, cart_items=None):
     try:
         tax = 0
         grand_totel = 0
+        total_mrp = 0  # NAYA: Poore cart ka MRP store karne ke liye
+        discount = 0   # NAYA: Total kitna discount mila
+        
         if request.user.is_authenticated:
             cart_items = CartItem.objects.filter(user=request.user, is_active=True)
         else:
             cart = Cart.objects.get(cart_id=_cart_id(request))
-            cart_items = CartItem.objects.filter(cart=cart , is_active=True)
+            cart_items = CartItem.objects.filter(cart=cart, is_active=True)
+            
         for cart_item in cart_items:
             totel += (cart_item.product.price * cart_item.quantity)
             quantity += cart_item.quantity
+            
+            # MRP LOGIC: Agar mrp exist karta hai toh use karein, warna selling price use karein
+            item_mrp = cart_item.product.mrp if cart_item.product.mrp else cart_item.product.price
+            total_mrp += (item_mrp * cart_item.quantity)
+            
         tax = (2 * totel) / 100
         grand_totel = totel + tax
+        
+        # DISCOUNT LOGIC: Total MRP mein se selling price (totel) minus kar do
+        discount = total_mrp - totel
+
     except ObjectDoesNotExist:
         pass
-
 
     context = {
         'totel': totel,
@@ -197,29 +209,43 @@ def cart(request , totel=0 , quantity=0 , cart_items=None):
         'cart_items': cart_items,
         'tax': tax,
         'grand_totel': grand_totel,
+        'total_mrp': total_mrp,  # Context mein bheja
+        'discount': discount,    # Context mein bheja
     }
 
     return render(request, 'store/cart.html', context)
 
 
 @login_required(login_url='login')
-def checkout(request , totel=0 , quantity=0 , cart_items=None):
+def checkout(request, totel=0, quantity=0, cart_items=None):
     try:
         tax = 0
         grand_totel = 0
+        total_mrp = 0  # NAYA: MRP store karne ke liye
+        discount = 0   # NAYA: Discount calculate karne ke liye
+        
         if request.user.is_authenticated:
             cart_items = CartItem.objects.filter(user=request.user, is_active=True)
         else:
             cart = Cart.objects.get(cart_id=_cart_id(request))
-            cart_items = CartItem.objects.filter(cart=cart , is_active=True)
+            cart_items = CartItem.objects.filter(cart=cart, is_active=True)
+            
         for cart_item in cart_items:
             totel += (cart_item.product.price * cart_item.quantity)
             quantity += cart_item.quantity
+            
+            # MRP calculation
+            item_mrp = cart_item.product.mrp if cart_item.product.mrp else cart_item.product.price
+            total_mrp += (item_mrp * cart_item.quantity)
+            
         tax = (2 * totel) / 100
         grand_totel = totel + tax
+        
+        # Discount Calculation
+        discount = total_mrp - totel
+        
     except ObjectDoesNotExist:
         pass
-
 
     context = {
         'totel': totel,
@@ -227,6 +253,8 @@ def checkout(request , totel=0 , quantity=0 , cart_items=None):
         'cart_items': cart_items,
         'tax': tax,
         'grand_totel': grand_totel,
+        'total_mrp': total_mrp,  # Context mein pass kiya
+        'discount': discount,    # Context mein pass kiya
     }
 
-    return render(request, 'store/checkout.html',context)
+    return render(request, 'store/checkout.html', context)

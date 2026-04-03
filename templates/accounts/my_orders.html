@@ -161,7 +161,7 @@ body { background-color: var(--m-bg); }
                                 Items: {{ order.orderproduct_set.count }} 
                             </div>
                         </div>
-                        <a href="{% url 'order_detail' order.order_number %}" class="view-btn">View Details</a>
+                        <a href="{% url 'track_order' order.order_number %}" class="view-btn">View Details</a>
                     </div>
                 </div>
                 {% endfor %}
