@@ -2,7 +2,7 @@
 from django.shortcuts import render , get_object_or_404, redirect
 
 from accounts.models import Wishlist
-from .models import Product, ReviewRating, Variation
+from .models import Product, ReviewRating, Variation, Brand
 from category.models import Category
 from carts.models import CartItem
 from django.contrib import messages 
@@ -12,6 +12,7 @@ from django.db.models import Q
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from orders.models import OrderProduct    
 from django.db.models import F, ExpressionWrapper, FloatField
+import difflib
 
 # Create your views here.
 def store(request, category_slug=None):
@@ -19,33 +20,58 @@ def store(request, category_slug=None):
     products = Product.objects.filter(is_available=True)
     category = None
 
-    # Category filter
+    # ========== CATEGORY FILTER ==========
     if category_slug:
         category = get_object_or_404(Category, slug=category_slug)
         products = products.filter(category=category)
 
-    # 🔎 PRICE FILTER
+    # ========== BRAND FILTER ==========
+    # FIX 1: Handle both brand slug and brand name/id
+    brand_param = request.GET.get('brand')
+    if brand_param:
+        try:
+            # Try to filter by brand slug first
+            products = products.filter(brand__slug=brand_param)
+        except:
+            # Fallback: Try to filter by brand name if slug doesn't work
+            products = products.filter(brand__brand_name__icontains=brand_param)
+
+    # ========== PRICE FILTER ==========
     min_price = request.GET.get('min_price')
     max_price = request.GET.get('max_price')
 
-    try:
-        if min_price:
-            products = products.filter(price__gte=int(min_price))
+    if min_price:
+        try:
+            min_price_int = int(min_price)
+            products = products.filter(price__gte=min_price_int)
+        except (ValueError, TypeError):
+            # Silently skip invalid price input
+            pass
 
-        if max_price:
-            products = products.filter(price__lte=int(max_price))
-    except (ValueError, TypeError):
-        pass
+    if max_price:
+        try:
+            max_price_int = int(max_price)
+            products = products.filter(price__lte=max_price_int)
+        except (ValueError, TypeError):
+            # Silently skip invalid price input
+            pass
 
+    # ========== DISCOUNT % FILTER (CALCULATED DYNAMICALLY) ==========
+    # FIX 2: Better handling of discount calculation with safety checks
     max_discount = request.GET.get('max_discount') 
     min_discount = request.GET.get('min_discount') 
 
-    try:
-        if max_discount or min_discount:
-            # Sirf unhi products par calculation hogi jinka MRP price se zyada hai
-            products = products.filter(mrp__isnull=False, mrp__gt=F('price'))
+    if max_discount or min_discount:
+        try:
+            # IMPORTANT: Only include products that have a valid MRP (not null and greater than 0)
+            # AND where MRP is actually higher than price (discount exists)
+            products = products.filter(mrp__isnull=False).exclude(mrp__lte=0)
             
-            # Database ke andar real-time Discount Percentage calculate karna
+            # Only filter by price difference if MRP is truly higher
+            products = products.filter(mrp__gt=F('price'))
+            
+            # Annotate with calculated discount percentage using safe division
+            # Formula: ((MRP - Price) / MRP) * 100
             products = products.annotate(
                 calculated_discount=ExpressionWrapper(
                     ((F('mrp') - F('price')) * 100.0) / F('mrp'),
@@ -53,13 +79,29 @@ def store(request, category_slug=None):
                 )
             )
 
-            # Ab us calculation ke hisaab se filter karna
+            # Apply discount range filters
             if max_discount:
-                products = products.filter(calculated_discount__lte=int(max_discount), calculated_discount__gt=0)
+                try:
+                    max_discount_int = int(max_discount)
+                    # Products with discount <= max_discount AND discount > 0
+                    products = products.filter(
+                        calculated_discount__lte=max_discount_int,
+                        calculated_discount__gt=0
+                    )
+                except (ValueError, TypeError):
+                    pass
+
             if min_discount:
-                products = products.filter(calculated_discount__gte=int(min_discount))
-    except (ValueError, TypeError):
-        pass
+                try:
+                    min_discount_int = int(min_discount)
+                    # Products with discount >= min_discount
+                    products = products.filter(calculated_discount__gte=min_discount_int)
+                except (ValueError, TypeError):
+                    pass
+        except Exception as e:
+            # Log but don't crash - continue with unfiltered results
+            print(f"Discount filter error: {e}")
+            pass
 
     # 🔎 SIZE FILTER (only if category selected)
     selected_sizes = request.GET.getlist('size')
@@ -85,12 +127,15 @@ def store(request, category_slug=None):
         ).values_list('variation_value', flat=True).distinct()
     else:
         available_sizes = None
+    
+    brands = Brand.objects.all()
 
     context = {
         'products': paged_products,
         'product_count': products.count(),
         'available_sizes': available_sizes,
         'selected_sizes': selected_sizes,
+        'brands': brands,
     }
 
     return render(request, 'store/store.html', context)
@@ -140,16 +185,44 @@ def search(request):
     if 'keyword' in request.GET:
         keyword = request.GET.get('keyword')
         if keyword:
-            products = Product.objects.filter(
-                Q(description__icontains=keyword) |
-                Q(product_name__icontains=keyword)
-            ).order_by('-created_date')
+            keyword = keyword.strip() # Extra spaces hata do
+            
+            # --- SPELLING MISTAKE FIXER LOGIC ---
+            # 1. Database se saare Brands aur Categories ke naam nikal lo
+            all_brand_names = list(Brand.objects.values_list('brand_name', flat=True))
+            all_category_names = list(Category.objects.values_list('category_name', flat=True))
+            
+            # 2. Python difflib se check karo ki keyword kis brand/category se sabse zyada milta julta hai (60% match)
+            closest_brands = difflib.get_close_matches(keyword, all_brand_names, n=1, cutoff=0.6)
+            closest_categories = difflib.get_close_matches(keyword, all_category_names, n=1, cutoff=0.6)
+            
+            # Agar spelling mistake thi, toh keyword ko actual naam se replace kar do (e.g., 'pume' -> 'puma')
+            search_brand = closest_brands[0] if closest_brands else keyword
+            search_category = closest_categories[0] if closest_categories else keyword
 
+            # --- SEARCH QUERY ---
+            # Ab hum exact keyword aur corrected keyword dono se search karenge
+            query = Q(description__icontains=keyword) | \
+                    Q(product_name__icontains=keyword) | \
+                    Q(brand__brand_name__icontains=search_brand) | \
+                    Q(category__category_name__icontains=search_category)
+
+            # Agar user ne multiple words likhe hain (jaise "Nike Jeans"), toh words ko split karke bhi dhundo
+            words = keyword.split()
+            if len(words) > 1:
+                for word in words:
+                    query |= Q(product_name__icontains=word) | \
+                             Q(brand__brand_name__icontains=word) | \
+                             Q(category__category_name__icontains=word)
+
+            # distinct() lagana zaroori hai taaki duplicate products na aayein
+            products = Product.objects.filter(query).order_by('-created_date').distinct()
             product_count = products.count()
 
     context = {
         'products': products,
         'product_count': product_count,
+        # 'keyword': keyword  # Optional: User ko dikhane ke liye ki unhone kya search kiya tha
     }
 
     return render(request, 'store/store.html', context)

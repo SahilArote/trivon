@@ -1,6 +1,6 @@
 import admin_thumbnails
 from django.contrib import admin
-from .models import Product, Variation, ReviewRating , ProductGallery
+from .models import Brand, Product, Variation, ReviewRating , ProductGallery
 
 @admin_thumbnails.thumbnail('image')
 class ProductGalleryInline(admin.TabularInline):
@@ -22,3 +22,4 @@ admin.site.register(Product, ProductAdmin)
 admin.site.register(Variation , VariationAdmin)
 admin.site.register(ReviewRating)
 admin.site.register(ProductGallery)
+admin.site.register(Brand)

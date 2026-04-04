@@ -6,11 +6,22 @@ from django.db.models import Avg, Count
 
 
 # Create your models here.
+
+class Brand(models.Model):
+    brand_name = models.CharField(max_length=100, unique=True)
+    slug = models.SlugField(max_length=100, unique=True)
+    description = models.TextField(max_length=500, blank=True)
+    brand_image = models.ImageField(upload_to='photos/brands', blank=True)
+
+    def __str__(self):
+        return self.brand_name
+    
 class Product(models.Model):
     product_name = models.CharField(max_length=200, unique=True)
     slug = models.SlugField(max_length=200, unique=True)
     description = models.TextField(max_length=500, blank=True)
     mrp = models.IntegerField(blank=True, null=True, help_text="Original Price")
+    brand = models.ForeignKey(Brand, on_delete=models.CASCADE, null=True, blank=True)
     price = models.IntegerField(help_text="Selling Price")
     image = models.ImageField(upload_to='photos/products')
     stock = models.IntegerField()

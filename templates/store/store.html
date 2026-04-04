@@ -17,6 +17,10 @@
         --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
     }
 
+    * {
+        box-sizing: border-box;
+    }
+
     body {
         background-color: var(--m-bg);
         font-family: 'Assistant', sans-serif;
@@ -218,7 +222,7 @@
         .sidebar { display: none; }
         .sidebar.active {
             display: block; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: white; z-index: 1000; padding: 20px; overflow-y: auto;
+            background: white; z-index: 1000; padding: 20px 20px 100px 20px; overflow-y: auto;
         }
         #mobile-filter-trigger { display: flex; }
         .product-grid { grid-template-columns: repeat(2, 1fr); gap: 15px; }
@@ -296,6 +300,19 @@
                         </label>
                         {% endfor %}
                     </div>
+
+                    <div class="filter-group">
+                        <span class="filter-title">Brands</span>
+                        <ul class="cat-list">
+                            <li><a href="{% url 'store' %}" style="font-weight:700; color: var(--m-pink);">All Brands</a></li>
+                            
+                            {% for brand in brands %}
+                            <li>
+                                <a href="{% url 'store' %}?brand={{ brand.slug }}">{{ brand.brand_name }}</a>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>  
                     <button type="submit" class="btn-apply">Apply Filters</button>
                 </div>
             </form>

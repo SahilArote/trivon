@@ -70,9 +70,9 @@
         <span>Explore</span>
     </a>
 
-    <a href="#">
-        <i class="fa fa-th-large"></i>
-        <span>Categories</span>
+    <a href="{% url 'my_orders' %}">
+        <i class="fa fa-truck"></i>
+        <span>Orders</span>
     </a>
 
     {% if user.is_authenticated %}

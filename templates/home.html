@@ -119,7 +119,7 @@
     <div class="category_items">
         <a href="{% url 'store' %}?min_discount=40"><img class="sale_item" src="{% static 'images/off/1.png' %}"></a>
         <a href="{% url 'store' %}?max_discount=50"><img class="sale_item" src="{% static 'images/off/2.png' %}"></a>
-        <a href="#"><img class="sale_item" src="{% static 'images/off/3.png' %}"></a>
+        <a href="{% url 'store' %}?brand=nike&min_discount=40"><img class="sale_item" src="{% static 'images/off/3.png' %}"></a>
         <a href="#"><img class="sale_item" src="{% static 'images/off/4.png' %}"></a>
         <a href="#"><img class="sale_item" src="{% static 'images/off/5.png' %}"></a>
         <a href="#"><img class="sale_item" src="{% static 'images/off/6.png' %}"></a>

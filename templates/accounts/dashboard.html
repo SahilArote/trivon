@@ -178,10 +178,15 @@ body { background-color: var(--m-bg); }
         <!-- Main Content -->
         <main class="dashboard-main">
             <div class="profile-header">
-                {% if 'http' in userprofile.profile_picture.name %}
-                    <img src="{{ userprofile.profile_picture.name }}" alt="User Profile" class="profile-avatar">
+                {% if userprofile.profile_picture %}
+                    {% if "http" in userprofile.profile_picture.url or "http" in userprofile.profile_picture.name %}
+                        <img src="{{ userprofile.profile_picture.url }}" alt="Profile" class="profile-avatar">
+                    {% else %}
+                        <img src="{{ userprofile.profile_picture.url }}" alt="Profile" class="profile-avatar">
+                    {% endif %}
                 {% else %}
-                    <img src="{{ userprofile.profile_picture.url }}" alt="User Profile" class="profile-avatar">
+                    {# Agar koi photo upload nahi hai toh default image dikhayein #}
+                    <img src="/static/images/avatars/avatar3    .jpgdefault-avatar.png" alt="Default Profile" class="profile-avatar">
                 {% endif %}
                 <div class="user-meta">
                     <h2>{{ user.full_name }}</h2>
