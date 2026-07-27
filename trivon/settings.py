@@ -27,12 +27,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv('SECRET_KEY')
+SECRET_KEY = os.getenv('SECRET_KEY') or 'django-insecure-ql6^0*7h2=9h761h@0y6gpp*y6b6h&-mr^k@p__#ca=*uc+78e'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG') == 'True'
 
 ALLOWED_HOSTS = ['*']
+CSRF_TRUSTED_ORIGINS = ['https://trivon.onrender.com', 'https://*.onrender.com']
+
 
 
 # Application definition
@@ -113,7 +115,8 @@ DATABASES = {
 DATABASE_URL = os.getenv('DATABASE_URL')
 
 if DATABASE_URL:
-    DATABASES['default'] = dj_database_url.parse(DATABASE_URL, conn_max_age=600)
+    DATABASES['default'] = dj_database_url.parse(DATABASE_URL, conn_max_age=0)
+
 
 # Password validation
 # https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
@@ -210,10 +213,11 @@ WHITENOISE_MANIFEST_STRICT = False
 
 # 1. Cloudinary Credentials
 CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': os.getenv('CLOUDINARY_CLOUD_NAME'),
-    'API_KEY': os.getenv('CLOUDINARY_API_KEY'),
-    'API_SECRET': os.getenv('CLOUDINARY_API_SECRET'),
+    'CLOUD_NAME': os.getenv('CLOUDINARY_CLOUD_NAME') or 'fyqru8ma',
+    'API_KEY': os.getenv('CLOUDINARY_API_KEY') or '415779339136694',
+    'API_SECRET': os.getenv('CLOUDINARY_API_SECRET') or 'WeQMcpTv3vsnUSC4GNZNDvcWDVg',
 }
+
 
 # 2. Storage Config
 STORAGES = {
